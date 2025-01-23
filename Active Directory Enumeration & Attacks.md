@@ -1,13 +1,8 @@
 # Introduction to Active Directory Enumeration & Attacks
 
-```
-keylian zergainoh@htb[/htb]$ xfreerdp /v:<MS01 target IP> /u:htb-student /p:Academy_student_AD!
-keylian zergainoh@htb[/htb]$ ssh htb-student@<ATTACK01 target IP>
-keylian zergainoh@htb[/htb]$ xfreerdp /v:<ATTACK01 target IP> /u:htb-student /p:HTB_@cademy_stdnt!
-```
 
-https://github.com/dmchell/SharpView.git
-https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
+[SharpView]https://github.com/dmchell/SharpView.git
+[PowerView]https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
 
 A PowerShell tool and a .NET port of the same used to gain situational awareness in AD. These tools can be used as replacements for various Windows net* commands and more. PowerView and SharpView can help us gather much of the data that BloodHound does, but it requires more work to make meaningful relationships among all of the data points. These tools are great for checking what additional access we may have with a new set of credentials, targeting specific users or computers, or finding some "quick wins" such as users that can be attacked via Kerberoasting or ASREPRoasting.
 
