@@ -1,10 +1,10 @@
- Introduction to Active Directory Enumeration & Attacks
+# Introduction to Active Directory Enumeration & Attacks
 
+```
 keylian zergainoh@htb[/htb]$ xfreerdp /v:<MS01 target IP> /u:htb-student /p:Academy_student_AD!
-
 keylian zergainoh@htb[/htb]$ ssh htb-student@<ATTACK01 target IP>
-
 keylian zergainoh@htb[/htb]$ xfreerdp /v:<ATTACK01 target IP> /u:htb-student /p:HTB_@cademy_stdnt!
+```
 
 https://github.com/dmchell/SharpView.git
 https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
