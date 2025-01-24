@@ -5,7 +5,7 @@
 1. [Initial Enumeration](#initial-enumeration)
    - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
 2. [Sniffing out a Foothold](#sniffing-out-a-foothold)
-   - [LLMNR/NBT-NS Poisoning from Linux](#llmnr/nbt-ns-poisoning-from-linux)
+   - [LLMNR/NBT-NS Poisoning from Linux](#llmnr-nbt-ns-poisoning-from-linux)
 3. [Sighting In, Hunting For A User](#)
    - [Enumerating & Retrieving Password Policies](#)
    - [Password Spraying - Making a Target User List](#)
