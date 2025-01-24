@@ -3,13 +3,13 @@
 # Sommaire
 
 1. Initial Enumeration
-   -External Recon and Principles
-   -Initial Enumeration of the Domain
+   - External Recon and Principles
+   - Initial Enumeration of the Domain
 2. Sniffing out a Foothold
-   -LLMNR/NBT-NS Posoning from Linux
-   -LLMNR/NBT-NS Posoning from Windows
-3. 
-
+   - LLMNR/NBT-NS Poisoning from Linux
+   - LLMNR/NBT-NS Poisoning from Windows
+3. Section 3
+4. 
 [SharpView]https://github.com/dmchell/SharpView.git
 [PowerView]https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
 
