@@ -879,6 +879,7 @@ Examinons certaines des capacités de PowerView et voyons quelles données il re
 | **Get-DomainTrustMapping** | Énumère toutes les relations de confiance pour le domaine actuel et tous les autres domaines vus |
 
 
+Cette commande PowerShell récupère les informations détaillées sur un utilisateur spécifique dans Active Directory (AD) en utilisant son identité (ici, mmorgan) et le domaine spécifié (inlanefreight.local). Elle sélectionne ensuite des propriétés spécifiques de l’utilisateur pour les afficher. Utile pour obtenir des détails précis sur un utilisateur particulier, ce qui peut aider à gérer les comptes et les permissions dans un environnement AD.
 ```
 Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
 
@@ -900,6 +901,7 @@ mail                 :
 useraccountcontrol   : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
 ```
 
+Cette commande PowerShell utilise PowerView pour récupérer tous les membres du groupe “Domain Admins” dans Active Directory, y compris les membres des groupes imbriqués. Utile pour obtenir une vue complète des utilisateurs et groupes ayant des privilèges administratifs dans le domaine, ce qui peut aider à auditer les permissions et à identifier les risques de sécurité potentiels.
 ```
 Get-DomainGroupMember -Identity "Domain Admins" -Recurse
 
@@ -934,6 +936,7 @@ MemberSID               : S-1-5-21-3842939050-3880317879-2865463114-1965
 <SNIP>
 ```
 
+Cette commande PowerShell utilise PowerView pour mapper toutes les relations de confiance de domaine accessibles. Utile pour obtenir une vue d’ensemble des relations de confiance établies entre différents domaines ou forêts, ce qui peut aider à comprendre les connexions et les permissions entre eux.
 ```
 Get-DomainTrustMapping
 
@@ -962,6 +965,7 @@ WhenCreated     : 11/1/2021 6:20:22 PM
 WhenChanged     : 2/26/2022 11:55:55 PM
 ```
 
+Cette commande PowerShell teste si l’utilisateur actuel a un accès administratif à l’ordinateur spécifié (ici, ACADEMY-EA-MS01). Utile pour vérifier les permissions administratives sur des machines locales ou distantes, ce qui peut aider à auditer les accès et les privilèges dans un environnement Active Directory.
 ```
 Test-AdminAccess -ComputerName ACADEMY-EA-MS01
 
@@ -970,6 +974,7 @@ ComputerName    IsAdmin
 ACADEMY-EA-MS01    True
 ```
 
+Cette commande PowerShell utilise PowerView pour récupérer tous les utilisateurs dans Active Directory (AD) qui ont un Service Principal Name (SPN) défini. Utile pour identifier les comptes de service, car ces comptes sont souvent utilisés par des applications et des services pour s’authentifier auprès d’autres services.
 ```
 Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 
@@ -987,12 +992,14 @@ testspn/kerberoast.inlanefreight.local        testspn
 testspn2/kerberoast.inlanefreight.local       testspn2
 ```
 
+La commande Get-DomainUser de SharpView permet de récupérer des informations sur les utilisateurs dans Active Directory (AD). Elle offre de nombreux paramètres pour affiner la recherche et obtenir des détails spécifiques sur les utilisateurs.
 ```
  .\SharpView.exe Get-DomainUser -Help
 
 Get_DomainUser -Identity <String[]> -DistinguishedName <String[]> -SamAccountName <String[]> -Name <String[]> -MemberDistinguishedName <String[]> -MemberName <String[]> -SPN <Boolean> -AdminCount <Boolean> -AllowDelegation <Boolean> -DisallowDelegation <Boolean> -TrustedToAuth <Boolean> -PreauthNotRequired <Boolean> -KerberosPreauthNotRequired <Boolean> -NoPreauth <Boolean> -Domain <String> -LDAPFilter <String> -Filter <String> -Properties <String[]> -SearchBase <String> -ADSPath <String> -Server <String> -DomainController <String> -SearchScope <SearchScope> -ResultPageSize <Int32> -ServerTimeLimit <Nullable`1> -SecurityMasks <Nullable`1> -Tombstone <Boolean> -FindOne <Boolean> -ReturnOne <Boolean> -Credential <NetworkCredential> -Raw <Boolean> -UACFilter <UACEnum>
 ```
 
+Cette commande SharpView récupère les informations sur un utilisateur spécifique dans Active Directory (AD) en utilisant son identité (ici, forend). Utile pour obtenir des détails précis sur cet utilisateur particulier, ce qui peut aider à gérer les comptes et les permissions dans un environnement AD.
 ```
 PS C:\htb> .\SharpView.exe Get-DomainUser -Identity forend
 
@@ -1028,6 +1035,7 @@ instancetype                   : 4
 codepage                       : 0
 ```
 
+Cette commande utilise Snaffler pour scanner un domaine Active Directory (ici, inlanefreight.local) à la recherche de données sensibles et les enregistre dans un fichier de log (snaffler.log). Le paramètre -v data spécifie que la commande doit être exécutée en mode verbeux pour les données.
 ```
 Snaffler.exe -s -d inlanefreight.local -o snaffler.log -v data
 ```
@@ -1072,6 +1080,7 @@ PS C:\htb> .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data
 <SNIP>
 ```
 
+Cette commande SharpHound collecte toutes les données disponibles dans un environnement Active Directory (AD) et les enregistre dans un fichier ZIP nommé ILFREIGHT.zip. Utile pour effectuer une analyse complète de l’AD, ce qui peut aider à identifier les relations et les permissions au sein du domaine.
 ```
 PS C:\htb> .\SharpHound.exe -c All --zipfilename ILFREIGHT
 
