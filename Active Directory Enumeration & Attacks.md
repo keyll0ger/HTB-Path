@@ -81,19 +81,19 @@
 ### Initial Enumeration of the Domain
 
 Cette commande capture et affiche les paquets réseau sur l’interface ens224
-```
+```bash
 keylian zergainoh@htb[/htb]$ sudo tcpdump -i ens224 
 ```
 
 
 Lance l’outil Responder sur l’interface ens224 en mode analyse.
-```
+```bash
 sudo responder -I ens224 -A
 ```
 
 
  Envoie des paquets ICMP à tous les hôtes dans le sous-réseau 172.16.5.0/23 pour déterminer lesquels sont actifs.
-```
+```bash
 keylian zergainoh@htb[/htb]$ fping -asgq 172.16.5.0/23
 
 172.16.5.5
