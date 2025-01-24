@@ -147,8 +147,9 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_
 2021/11/17 23:01:56 >  Done! Tested 48705 usernames (56 valid) in 9.940 seconds
 
 ```
+## Sniffing out a Foothold
 
-### LLMNR/NBT-NS Poisoning from Linux
+### LLMNR/NBT NS Poisoning from Linux
 ```bash
 ifconfig                                                                                                                                                            
 docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
