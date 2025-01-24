@@ -2620,7 +2620,7 @@ PS C:\htb> Add-Type -AssemblyName System.IdentityModel
 PS C:\htb> New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433"
 ```
 
-####### Explication des commandes
+###### Explication des commandes
 
 1. **Add-Type** : Cette commande ajoute une classe du framework .NET à notre session PowerShell, ce qui permet de l'instancier comme n'importe quel objet du framework .NET.
 2. **-AssemblyName** : Ce paramètre permet de spécifier l'assemblée contenant les types que nous souhaitons utiliser.
