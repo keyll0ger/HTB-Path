@@ -2567,7 +2567,7 @@ Avant l'existence d'outils comme Rubeus, le vol ou la falsification de tickets K
 
 ###### Énumération des SPN avec setspn.exe
 
-####### Kerberoasting - depuis Windows
+###### Kerberoasting - depuis Windows
 
 ```bash
 C:\htb> setspn.exe -Q */*
@@ -2575,7 +2575,7 @@ C:\htb> setspn.exe -Q */*
 
 Cela permet d'énumérer les SPN dans le domaine spécifié. L'outil retourne plusieurs SPN associés à différents comptes et services dans le domaine. Nous nous concentrerons sur les comptes utilisateurs et ignorerons les comptes d'ordinateurs retournés par l'outil.
 
-####### Exemple de sortie
+###### Exemple de sortie
 
 ```
 Vérification du domaine DC=INLANEFREIGHT,DC=LOCAL
@@ -2613,7 +2613,7 @@ Nous pouvons voir plusieurs SPN retournés pour différents hôtes dans le domai
 
 Une fois les SPN énumérés, nous pouvons utiliser PowerShell pour demander des tickets TGS (Ticket Granting Service) pour un compte spécifique et les charger en mémoire. Ensuite, nous pouvons extraire ces tickets en utilisant Mimikatz. Voici un exemple pour cibler un utilisateur spécifique :
 
-###### Exemple PowerShell
+##### Exemple PowerShell
 
 ```powershell
 PS C:\htb> Add-Type -AssemblyName System.IdentityModel
