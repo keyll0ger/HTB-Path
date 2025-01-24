@@ -1,5 +1,14 @@
 # Introduction to Active Directory Enumeration & Attacks
 
+# Sommaire
+
+1. Initial Enumeration
+   -External Recon and Principles
+   -Initial Enumeration of the Domain
+2. Sniffing out a Foothold
+   -LLMNR/NBT-NS Posoning from Linux
+   -LLMNR/NBT-NS Posoning from Windows
+3. 
 
 [SharpView]https://github.com/dmchell/SharpView.git
 [PowerView]https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
@@ -1827,3 +1836,35 @@ PS C:\htb> dsquery computer
 "CN=LON-0456,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
 "CN=LON-0457,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
 "CN=LON-0458,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+```
+
+#### Recherche par Joker
+
+```powershell
+PS C:\htb> dsquery * "CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+
+"CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=krbtgt,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Domain Computers,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Domain Controllers,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Schema Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Enterprise Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Cert Publishers,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Domain Users,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Domain Guests,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Group Policy Creator Owners,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=RAS and IAS Servers,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Allowed RODC Password Replication Group,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Denied RODC Password Replication Group,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Read-only Domain Controllers,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Enterprise Read-only Domain Controllers,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Cloneable Domain Controllers,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Protected Users,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Key Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Enterprise Key Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=DnsAdmins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=DnsUpdateProxy,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=certsvc,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=Jessica Ramsey,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=svc_vmwaresso,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
