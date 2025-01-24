@@ -1641,7 +1641,7 @@ Examinons certaines des capacités de PowerView et voyons quelles données il re
 | `Get-DomainForeignGroupMember` | Énumère les groupes avec des utilisateurs en dehors du domaine du groupe et renvoie chaque membre étranger |
 | `Get-DomainTrustMapping` | Énumère tous les trusts pour le domaine actuel et tous les autres vus |
 
-###Domain User Information
+### Domain User Information
 
 ```powershell
 PS C:\htb> Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
@@ -1757,7 +1757,176 @@ testspn/kerberoast.inlanefreight.local        testspn
 testspn2/kerberoast.inlanefreight.local       testspn2
 
 ```
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX SHARPVIEW
+### SharpView
+
+**PowerView** fait partie de la suite offensive PowerShell **PowerSploit**, désormais obsolète. Cependant, l'outil a été mis à jour par **BC-Security** dans le cadre de leur framework **Empire 4**. Empire 4 est un fork du projet Empire original, maintenu activement depuis avril 2022. Nous utilisons la version en développement de PowerView dans ce module, car c'est un excellent outil pour effectuer des reconnaissances dans un environnement Active Directory. Malgré l'arrêt de la maintenance de la version originale, PowerView reste extrêmement puissant et utile dans les réseaux AD modernes.
+
+La version de PowerView maintenue par BC-Security propose de nouvelles fonctionnalités, comme **Get-NetGmsa**, qui permet de rechercher des comptes de service gérés par groupe (Group Managed Service Accounts). Cependant, cette fonctionnalité est hors du cadre de ce module. Il est intéressant de comparer les différences subtiles entre les anciennes et les nouvelles versions pour mieux comprendre leurs capacités respectives.
+
+Un autre outil à expérimenter est **SharpView**, un portage .NET de PowerView. De nombreuses fonctions disponibles dans PowerView peuvent également être utilisées avec SharpView. En ajoutant l'option `-Help` à une méthode, nous pouvons afficher la liste des arguments possibles.
+
+## Énumération avec authentification depuis Windows
+
+Exemple d'utilisation de SharpView pour obtenir de l'aide sur une commande spécifique :
+
+Cela affiche la liste des arguments possibles pour la méthode Get-DomainUser :
+
+```powershell
+PS C:\htb> .\SharpView.exe Get-DomainUser -Help
+
+Get_DomainUser -Identity <String[]> -DistinguishedName <String[]> -SamAccountName <String[]> -Name <String[]> 
+-MemberDistinguishedName <String[]> -MemberName <String[]> -SPN <Boolean> -AdminCount <Boolean> 
+-AllowDelegation <Boolean> -DisallowDelegation <Boolean> -TrustedToAuth <Boolean> -PreauthNotRequired <Boolean> 
+-KerberosPreauthNotRequired <Boolean> -NoPreauth <Boolean> -Domain <String> -LDAPFilter <String> -Filter <String> 
+-Properties <String[]> -SearchBase <String> -ADSPath <String> -Server <String> -DomainController <String> 
+-SearchScope <SearchScope> -ResultPageSize <Int32> -ServerTimeLimit <Nullable`1> -SecurityMasks <Nullable`1> 
+-Tombstone <Boolean> -FindOne <Boolean> -ReturnOne <Boolean> -Credential <NetworkCredential> -Raw <Boolean> 
+-UACFilter <UACEnum>
+
+```
+
+Nous pouvons utiliser SharpView pour récupérer des informations sur un utilisateur spécifique, par exemple forend, que nous contrôlons :
+
+```powershell
+PS C:\htb> .\SharpView.exe Get-DomainUser -Identity forend
+
+[Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
+[Get-DomainUser] filter string: (&(samAccountType=805306368)(|(samAccountName=forend)))
+objectsid                      : {S-1-5-21-3842939050-3880317879-2865463114-5614}
+samaccounttype                 : USER_OBJECT
+objectguid                     : 53264142-082a-4cb8-8714-8158b4974f3b
+useraccountcontrol             : NORMAL_ACCOUNT
+accountexpires                 : 12/31/1600 4:00:00 PM
+lastlogon                      : 4/18/2022 1:01:21 PM
+lastlogontimestamp             : 4/9/2022 1:33:21 PM
+pwdlastset                     : 2/28/2022 12:03:45 PM
+lastlogoff                     : 12/31/1600 4:00:00 PM
+badPasswordTime                : 4/5/2022 7:09:07 AM
+name                           : forend
+distinguishedname              : CN=forend,OU=IT Admins,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+whencreated                    : 2/28/2022 8:03:45 PM
+whenchanged                    : 4/9/2022 8:33:21 PM
+samaccountname                 : forend
+memberof                       : {CN=VPN Users,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, 
+                                  CN=Shared Calendar Read,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, 
+                                  CN=Printer Access,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, 
+                                  CN=File Share H Drive,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, 
+                                  CN=File Share G Drive,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL}
+cn                             : {forend}
+objectclass                    : {top, person, organizationalPerson, user}
+badpwdcount                    : 0
+countrycode                    : 0
+usnchanged                     : 3259288
+logoncount                     : 26618
+primarygroupid                 : 513
+objectcategory                 : CN=Person,CN=Schema,CN=Configuration,DC=INLANEFREIGHT,DC=LOCAL
+dscorepropagationdata          : {3/24/2022 3:58:07 PM, 3/24/2022 3:57:44 PM, 3/24/2022 3:52:58 PM, 
+                                  3/24/2022 3:49:31 PM, 7/14/1601 10:36:49 PM}
+usncreated                     : 3054181
+instancetype                   : 4
+codepage                       : 0
+```
+
+### Snaffler
+
+Snaffler est un outil qui peut nous aider à acquérir des informations d'identification ou d'autres données sensibles dans un environnement Active Directory. Il fonctionne en obtenant une liste des hôtes du domaine, puis en énumérant les partages et les répertoires accessibles en lecture sur ces hôtes. Une fois cette étape réalisée, il parcourt les répertoires accessibles par notre utilisateur et recherche des fichiers pouvant améliorer notre position dans l'évaluation. Snaffler doit être exécuté depuis un hôte joint au domaine ou dans un contexte d'utilisateur du domaine.
+
+#### Exécution de Snaffler
+
+Pour exécuter Snaffler, utilisez la commande suivante :
+
+```bash
+Snaffler.exe -s -d inlanefreight.local -o snaffler.log -v data
+```
+
+#### Options de Snaffler
+
+- **`-s`** : Affiche les résultats dans la console.
+- **`-d`** : Spécifie le domaine à analyser.
+- **`-o`** : Permet d’écrire les résultats dans un fichier journal.
+- **`-v`** : Définit le niveau de verbosité. La valeur `data` est généralement idéale, car elle affiche uniquement les résultats, ce qui facilite l'analyse des exécutions de l'outil.
+
+#### Recommandations
+
+Snaffler peut générer une quantité considérable de données. Il est donc conseillé de :
+
+1. Exporter les résultats dans un fichier à l'aide de l'option `-o`.
+2. Laisser l'outil s'exécuter complètement avant d'analyser les données.
+3. Fournir les sorties brutes de Snaffler aux clients lors d'un test d'intrusion. Ces données peuvent les aider à identifier rapidement les partages à haute valeur qui nécessitent une sécurisation prioritaire.
+
+### BloodHound
+
+#### Vue d'ensemble
+
+BloodHound est un outil open-source conçu pour identifier les chemins d'attaque dans un environnement Active Directory (AD) en analysant les relations entre les objets. Les testeurs d'intrusion et les équipes de sécurité (blue team) peuvent utiliser BloodHound pour visualiser et comprendre ces relations. Grâce à des requêtes Cipher personnalisées, BloodHound peut révéler des failles critiques qui auraient pu passer inaperçues pendant des années.
+
+#### Configuration initiale
+
+Pour utiliser BloodHound efficacement :
+1. Authentifiez-vous en tant qu'utilisateur du domaine depuis un hôte d'attaque Windows situé dans le réseau (pas nécessairement joint au domaine).
+2. Alternativement, transférez l'outil sur un hôte joint au domaine en utilisant des méthodes telles que :
+   - Serveur HTTP Python
+   - `smbserver.py` d'Impacket
+3. Dans cet exemple, nous utilisons `SharpHound.exe` sur l'hôte d'attaque.
+
+#### Utilisation de SharpHound
+
+Exécutez l'option `--help` pour afficher les paramètres disponibles :
+
+```bash
+PS C:\htb> .\SharpHound.exe --help
+```
+
+#### Options clés :
+- **`-c, --collectionmethods`** : Spécifie les méthodes de collecte de données. Options disponibles : `Container`, `Group`, `Session`, `LoggedOn`, `ACL`, `Trusts`, `Default`, etc.
+- **`-d, --domain`** : Spécifie le domaine à analyser.
+- **`-s, --searchforest`** : Recherche dans tous les domaines de la forêt (par défaut : `false`).
+- **`--stealth`** : Active la collecte furtive, privilégiant `DCOnly` autant que possible.
+- **`--zipfilename`** : Spécifie le nom du fichier ZIP de sortie.
+
+#### Commande Exemple :
+```bash
+PS C:\htb> .\SharpHound.exe -c All --zipfilename ILFREIGHT
+```
+
+#### Résultats :
+- SharpHound collecte les données et génère un fichier ZIP contenant des fichiers JSON pour l'analyse.
+- Exfiltrez le fichier ZIP vers votre machine virtuelle ou importez-le dans l'interface graphique de BloodHound.
+
+#### Utilisation de l'interface graphique de BloodHound
+
+1. Ouvrez BloodHound sur l'hôte d'attaque ou la machine virtuelle :
+   ```bash
+   PS C:\htb> bloodhound
+   ```
+2. Connectez-vous avec les identifiants par défaut (`neo4j: HTB_@cademy_stdnt!`) si demandé.
+3. Téléchargez le fichier ZIP via le bouton **Upload Data**.
+4. Explorez les données téléchargées en recherchant le domaine (par exemple, `domain:INLANEFREIGHT.LOCAL`).
+
+### Requêtes préconstruites
+
+BloodHound inclut des requêtes préconstruites pour analyser le domaine. Par exemple :
+
+#### **Trouver des ordinateurs avec des systèmes d'exploitation non pris en charge**
+- Identifie les hôtes exécutant des systèmes d'exploitation obsolètes et non pris en charge.
+- Résultats possibles :
+  - **Windows 7**
+  - **Windows Server 2008**
+- Ces systèmes sont courants dans les réseaux d'entreprise en raison de dépendances à des logiciels anciens.
+
+#### Recommandations :
+1. Segmentez les systèmes obsolètes du reste du réseau.
+2. Élaborez un plan pour remplacer ou décommissionner ces systèmes.
+3. Validez si les hôtes sont "actifs" ou des enregistrements inactifs dans AD avant de rédiger un rapport.
+
+### Rapport
+- Documentez les découvertes comme suit :
+  - **Failles à haut risque** : Pour les systèmes d'exploitation non pris en charge.
+  - **Recommandations de bonnes pratiques** : Pour nettoyer les anciens enregistrements dans AD.
+
+BloodHound fournit des informations précieuses pour sécuriser les environnements AD, identifier les vulnérabilités et aider les organisations à renforcer leurs réseaux.
+
+
 ## Living Off the Land
 
 ### Commandes de Base pour l'Énumération
