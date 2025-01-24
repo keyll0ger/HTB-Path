@@ -266,8 +266,7 @@ sudo responder -I ens224
 ........................................
 
 ```
-## Sighting In, Hunting For A User
-
+## Sighting In Hunting For A User
 
 
 ### Enumerating & Retrieving Password Policies
