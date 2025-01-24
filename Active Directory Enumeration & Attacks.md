@@ -446,9 +446,8 @@ Cette commande utilise un script PowerShell pour effectuer une attaque de pulvé
 Invoke-DomainPasswordSpray -Password Winter2022 -OutFile spray_success -ErrorAction SilentlyContinue
 ```
 
-```Checking the Status of Defender with Get-MpComputerStatus
-Enumerating Security Controls
-
+Cette commande PowerShell récupère l’état des différentes fonctionnalités de sécurité sur un ordinateur, en particulier celles liées à Windows Defender. Utile pour vérifier la configuration actuelle de Windows Defender, ce qui peut aider à comprendre quelles protections sont activées ou désactivées.
+```
 PS C:\htb> Get-MpComputerStatus
 
 AMEngineVersion                 : 1.1.17400.5
@@ -488,7 +487,6 @@ PSComputerName                  :
 
 Cette commande PowerShell récupère la politique AppLocker effective et affiche les collections de règles.
 Utile pour vérifier les règles AppLocker en vigueur sur un système, ce qui peut aider à comprendre quelles applications sont autorisées ou bloquées.
-
 ```
 PS C:\htb> Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 
@@ -542,6 +540,7 @@ PS C:\htb> $ExecutionContext.SessionState.LanguageMode
 ConstrainedLanguage
 ```
 
+Cette commande PowerShell recherche dans toutes les unités d’organisation (OU) pour identifier les groupes Active Directory (AD) qui ont des droits de lecture délégués sur l’attribut ms-Mcs-AdmPwd. Utile pour vérifier quelles entités ont accès aux mots de passe gérés par LAPS (Local Administrator Password Solution), ce qui peut aider à comprendre les permissions de sécurité en vigueur sur un système.
 ```
 PS C:\htb> Find-LAPSDelegatedGroups
 
@@ -567,9 +566,8 @@ OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\Domain Admins
 OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\LAPS Admins
 ```
 
-```Using Get-LAPSComputers
-Enumerating Security Controls
-
+Cette commande PowerShell affiche tous les ordinateurs avec LAPS (Local Administrator Password Solution) activé, y compris les informations sur l’expiration des mots de passe et les mots de passe eux-mêmes si l’utilisateur a les droits d’accès nécessaires. Utile pour auditer les environnements Active Directory qui ont déployé LAPS, ce qui peut aider à comprendre quelles machines sont protégées et comment les mots de passe administratifs sont gérés.
+```
 PS C:\htb> Get-LAPSComputers
 
 ComputerName                Password       Expiration
@@ -580,6 +578,15 @@ SQL01.INLANEFREIGHT.LOCAL   9G#f;p41dcAe,s 09/26/2020 00:30:09
 WS01.INLANEFREIGHT.LOCAL    TCaG-F)3No;l8C 09/26/2020 00:46:04
 ```
 
+Cette série de commandes rpcclient permet d’effectuer plusieurs actions pour auditer un environnement Active Directory. Voici ce que chaque partie de la commande fait :
+
+enumdomusers : Énumère tous les utilisateurs du domaine. Cela te donne une liste complète des utilisateurs présents dans le domaine.
+
+queryuser 0x492 : Récupère les informations détaillées sur un utilisateur spécifique en utilisant son RID (Relative Identifier). Cela te permet d’obtenir des détails précis sur cet utilisateur particulier.
+
+enumdomgroups : Énumère tous les groupes du domaine. Cela te donne une liste complète des groupes présents dans le domaine.
+
+querygroup 0xff0 : Récupère les informations détaillées sur un groupe spécifique en utilisant son RID. Cela te permet d’obtenir des détails précis sur ce groupe particulier.
 ```
 rpcclient $> enumdomusers
 queryuser 0x492
@@ -644,6 +651,7 @@ SystemsContainer                   : CN=System,DC=INLANEFREIGHT,DC=LOCAL
 UsersContainer                     : CN=Users,DC=INLANEFREIGHT,DC=LOCAL
 ```
 
+Cette commande PowerShell récupère tous les comptes d’utilisateurs dans Active Directory qui ont un attribut ServicePrincipalName non nul. Utile pour identifier les comptes de service, car ces comptes sont souvent utilisés par des applications et des services pour s’authentifier auprès d’autres services.
 ```
  Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
 
@@ -674,6 +682,7 @@ UserPrincipalName    :
 <SNIP>
 ```
 
+Cette commande PowerShell récupère toutes les relations de confiance (trusts) dans Active Directory. Utile pour obtenir une vue d’ensemble des relations de confiance établies entre différents domaines ou forêts, ce qui peut aider à comprendre les connexions et les permissions entre eux.
 ```
  Get-ADTrust -Filter *
 
@@ -726,6 +735,7 @@ UsesAESKeys             : False
 UsesRC4Encryption       : False
 ```
 
+Cette commande PowerShell récupère tous les groupes dans Active Directory et sélectionne uniquement leurs noms. Utile pour obtenir une liste complète des noms de groupes présents dans un environnement Active Directory, ce qui peut aider à organiser et à gérer les permissions et les accès.
 ```
  Get-ADGroup -Filter * | select name
 
@@ -763,6 +773,7 @@ Domain Admins
 <SNIP>
 ```
 
+Cette commande PowerShell récupère les informations sur le groupe “Backup Operators” dans Active Directory. Utile pour obtenir des détails spécifiques sur ce groupe, comme ses membres, ses attributs et ses permissions, ce qui peut aider à gérer les accès et les rôles de sauvegarde dans un environnement Active Directory.
 ```
 Get-ADGroup -Identity "Backup Operators"
 
@@ -787,46 +798,64 @@ SamAccountName    : backupagent
 SID               : S-1-5-21-3842939050-3880317879-2865463114-5220
 ```
 
-PowerView
+### PowerView
 
-PowerView is a tool written in PowerShell to help us gain situational awareness within an AD environment. Much like BloodHound, it provides a way to identify where users are logged in on a network, enumerate domain information such as users, computers, groups, ACLS, trusts, hunt for file shares and passwords, perform Kerberoasting, and more. It is a highly versatile tool that can provide us with great insight into the security posture of our client's domain. It requires more manual work to determine misconfigurations and relationships within the domain than BloodHound but, when used right, can help us to identify subtle misconfigurations.
+**PowerView** est un outil écrit en PowerShell qui nous aide à obtenir une connaissance situationnelle dans un environnement Active Directory (AD). Tout comme BloodHound, il permet d'identifier où les utilisateurs sont connectés sur un réseau, d'énumérer les informations de domaine telles que les utilisateurs, les ordinateurs, les groupes, les ACL, les relations de confiance, de rechercher des partages de fichiers et des mots de passe, de réaliser des attaques Kerberoasting, et bien plus encore. C'est un outil très polyvalent qui peut nous fournir une grande visibilité sur la posture de sécurité du domaine de notre client. Il nécessite plus de travail manuel pour déterminer les mauvaises configurations et les relations au sein du domaine que BloodHound, mais lorsqu'il est bien utilisé, il peut nous aider à identifier des mauvaises configurations subtiles.
 
-Let's examine some of PowerView's capabilities and see what data it returns. The table below describes some of the most useful functions PowerView offers.
-Command 	Description
-Export-PowerViewCSV 	Append results to a CSV file
-ConvertTo-SID 	Convert a User or group name to its SID value
-Get-DomainSPNTicket 	Requests the Kerberos ticket for a specified Service Principal Name (SPN) account
-Domain/LDAP Functions: 	
-Get-Domain 	Will return the AD object for the current (or specified) domain
-Get-DomainController 	Return a list of the Domain Controllers for the specified domain
-Get-DomainUser 	Will return all users or specific user objects in AD
-Get-DomainComputer 	Will return all computers or specific computer objects in AD
-Get-DomainGroup 	Will return all groups or specific group objects in AD
-Get-DomainOU 	Search for all or specific OU objects in AD
-Find-InterestingDomainAcl 	Finds object ACLs in the domain with modification rights set to non-built in objects
-Get-DomainGroupMember 	Will return the members of a specific domain group
-Get-DomainFileServer 	Returns a list of servers likely functioning as file servers
-Get-DomainDFSShare 	Returns a list of all distributed file systems for the current (or specified) domain
-GPO Functions: 	
-Get-DomainGPO 	Will return all GPOs or specific GPO objects in AD
-Get-DomainPolicy 	Returns the default domain policy or the domain controller policy for the current domain
-Computer Enumeration Functions: 	
-Get-NetLocalGroup 	Enumerates local groups on the local or a remote machine
-Get-NetLocalGroupMember 	Enumerates members of a specific local group
-Get-NetShare 	Returns open shares on the local (or a remote) machine
-Get-NetSession 	Will return session information for the local (or a remote) machine
-Test-AdminAccess 	Tests if the current user has administrative access to the local (or a remote) machine
-Threaded 'Meta'-Functions: 	
-Find-DomainUserLocation 	Finds machines where specific users are logged in
-Find-DomainShare 	Finds reachable shares on domain machines
-Find-InterestingDomainShareFile 	Searches for files matching specific criteria on readable shares in the domain
-Find-LocalAdminAccess 	Find machines on the local domain where the current user has local administrator access
-Domain Trust Functions: 	
-Get-DomainTrust 	Returns domain trusts for the current domain or a specified domain
-Get-ForestTrust 	Returns all forest trusts for the current forest or a specified forest
-Get-DomainForeignUser 	Enumerates users who are in groups outside of the user's domain
-Get-DomainForeignGroupMember 	Enumerates groups with users outside of the group's domain and returns each foreign member
-Get-DomainTrustMapping 	Will enumerate all trusts for the current domain and any others seen.
+Examinons certaines des capacités de PowerView et voyons quelles données il retourne. Le tableau ci-dessous décrit certaines des fonctions les plus utiles offertes par PowerView.
+
+| Commande | Description |
+| --- | --- |
+| **Export-PowerViewCSV** | Ajoute les résultats à un fichier CSV |
+| **ConvertTo-SID** | Convertit un nom d'utilisateur ou de groupe en sa valeur SID |
+| **Get-DomainSPNTicket** | Demande le ticket Kerberos pour un compte Service Principal Name (SPN) spécifié |
+
+#### Fonctions Domain/LDAP :
+| Commande | Description |
+| --- | --- |
+| **Get-Domain** | Retourne l'objet AD pour le domaine actuel (ou spécifié) |
+| **Get-DomainController** | Retourne une liste des contrôleurs de domaine pour le domaine spécifié |
+| **Get-DomainUser** | Retourne tous les utilisateurs ou des objets utilisateur spécifiques dans AD |
+| **Get-DomainComputer** | Retourne tous les ordinateurs ou des objets ordinateur spécifiques dans AD |
+| **Get-DomainGroup** | Retourne tous les groupes ou des objets groupe spécifiques dans AD |
+| **Get-DomainOU** | Recherche tous les objets OU ou des objets OU spécifiques dans AD |
+| **Find-InterestingDomainAcl** | Trouve les ACL d'objets dans le domaine avec des droits de modification définis sur des objets non intégrés |
+| **Get-DomainGroupMember** | Retourne les membres d'un groupe de domaine spécifique |
+| **Get-DomainFileServer** | Retourne une liste de serveurs fonctionnant probablement comme serveurs de fichiers |
+| **Get-DomainDFSShare** | Retourne une liste de tous les systèmes de fichiers distribués pour le domaine actuel (ou spécifié) |
+
+#### Fonctions GPO :
+| Commande | Description |
+| --- | --- |
+| **Get-DomainGPO** | Retourne tous les GPO ou des objets GPO spécifiques dans AD |
+| **Get-DomainPolicy** | Retourne la politique de domaine par défaut ou la politique du contrôleur de domaine pour le domaine actuel |
+
+#### Fonctions d'énumération des ordinateurs :
+| Commande | Description |
+| --- | --- |
+| **Get-NetLocalGroup** | Énumère les groupes locaux sur la machine locale ou une machine distante |
+| **Get-NetLocalGroupMember** | Énumère les membres d'un groupe local spécifique |
+| **Get-NetShare** | Retourne les partages ouverts sur la machine locale (ou une machine distante) |
+| **Get-NetSession** | Retourne les informations de session pour la machine locale (ou une machine distante) |
+| **Test-AdminAccess** | Teste si l'utilisateur actuel a un accès administratif à la machine locale (ou une machine distante) |
+
+#### Fonctions 'Meta' Threaded :
+| Commande | Description |
+| --- | --- |
+| **Find-DomainUserLocation** | Trouve les machines où des utilisateurs spécifiques sont connectés |
+| **Find-DomainShare** | Trouve des partages accessibles sur les machines du domaine |
+| **Find-InterestingDomainShareFile** | Recherche des fichiers correspondant à des critères spécifiques sur des partages lisibles dans le domaine |
+| **Find-LocalAdminAccess** | Trouve des machines sur le domaine local où l'utilisateur actuel a un accès administrateur local |
+
+#### Fonctions de confiance de domaine :
+| Commande | Description |
+| --- | --- |
+| **Get-DomainTrust** | Retourne les relations de confiance de domaine pour le domaine actuel ou un domaine spécifié |
+| **Get-ForestTrust** | Retourne toutes les relations de confiance de forêt pour la forêt actuelle ou une forêt spécifiée |
+| **Get-DomainForeignUser** | Énumère les utilisateurs qui sont dans des groupes en dehors du domaine de l'utilisateur |
+| **Get-DomainForeignGroupMember** | Énumère les groupes avec des utilisateurs en dehors du domaine du groupe et retourne chaque membre étranger |
+| **Get-DomainTrustMapping** | Énumère toutes les relations de confiance pour le domaine actuel et tous les autres domaines vus |
+
 
 ```
 Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
