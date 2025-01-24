@@ -17,6 +17,16 @@
    - Credentialed Enumeration from Windows
    - Credentialed Enumeration from Linux
    - Living Off the Land
+7. Cooking with the Fire
+   - Kerberoastin from Linux
+   - Kerberoastin from Windows
+8.An ACE in the Hole
+   - ACL Abuse Primer
+   - ACL Enumeration
+   - ACL Abuse Tactics
+   - DCSync
+9. Stacking The Desck
+    
    
 
 
