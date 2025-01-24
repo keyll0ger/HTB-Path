@@ -2,7 +2,7 @@
 
 # Sommaire
 
-1. Initial Enumeration(#initial-enumeration)
+1. [Initial Enumeration](#initial-enumeration)
    - External Recon and Principles
    - Initial Enumeration of the Domain
 2. Sniffing out a Foothold
