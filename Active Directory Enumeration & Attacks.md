@@ -4,7 +4,7 @@
 
 1. [Initial Enumeration](#initial-enumeration)
    - [External Recon and Principles](#external-recon-and-principles)
-   - [Initial Enumeration of the Domain](#initial-enumerationof-the-domain)
+   - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
 2. Sniffing out a Foothold
    - LLMNR/NBT-NS Poisoning from Linux
    - LLMNR/NBT-NS Poisoning from Windows
