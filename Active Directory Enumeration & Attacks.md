@@ -2397,3 +2397,106 @@ PS C:\htb> dsquery * "CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
 "CN=certsvc,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
 "CN=Jessica Ramsey,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
 "CN=svc_vmwaresso,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
+```
+
+#### Users With Specific Attributes Set (PASSWD_NOTREQD)
+
+```powershell
+PS C:\htb> dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=32))" -attr distinguishedName userAccountControl
+
+  distinguishedName                                                                              userAccountControl
+  CN=Guest,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                                    66082
+  CN=Marion Lowe,OU=HelpDesk,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL      66080
+  CN=Yolanda Groce,OU=HelpDesk,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL    66080
+  CN=Eileen Hamilton,OU=DevOps,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL    66080
+  CN=Jessica Ramsey,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                           546
+  CN=NAGIOSAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                           544
+  CN=LOGISTICS$,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                               2080
+  CN=FREIGHTLOGISTIC$,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                         2080
+```
+
+#### Valeurs UAC
+
+##### Valeurs des Bits du Contrôle de Compte Utilisateur
+
+Le Contrôle de Compte Utilisateur (UAC) dans Windows utilise des valeurs spécifiques pour définir les permissions et restrictions appliquées aux comptes. Ces valeurs sont stockées dans l'attribut `userAccountControl` dans Active Directory et peuvent être décodées pour comprendre les propriétés d'un compte utilisateur.
+
+###### Valeurs UAC en Décimal
+
+| Valeur Décimale | Description                                                                     |
+|------------------|---------------------------------------------------------------------------------|
+| `1`              | Script : Un script de connexion est exécuté.                                  |
+| `2`              | Compte Désactivé : Le compte utilisateur est désactivé.                       |
+| `8`              | Répertoire Personnel Requis : Un répertoire personnel est requis pour ce compte. |
+| `16`             | Verrouillage : Le compte est actuellement verrouillé.                         |
+| `32`             | Mot de Passe Non Requis : Aucun mot de passe n'est requis pour ce compte.     |
+| `128`            | Compte Normal : Un compte utilisateur standard.                               |
+| `256`            | Compte de Confiance Inter-Domaine : Un compte de confiance pour un domaine.   |
+| `512`            | Compte de Confiance de Poste de Travail : Un compte d'ordinateur pour un poste de travail ou un serveur. |
+| `2048`           | Mot de Passe Non Expiré : Le mot de passe du compte n'expire pas.             |
+| `4096`           | Compte de Connexion MNS : Un compte de connexion MNS (Message Number Service). |
+| `8192`           | Carte à Puce Requise : Une carte à puce est requise pour la connexion.        |
+| `16384`          | Délégué de Confiance : Le compte est de confiance pour la délégation.         |
+| `32768`          | Non Délégué : Le compte est sensible et ne peut pas être délégué.             |
+| `65536`          | Utiliser Uniquement la Clé DES : Le compte ne peut utiliser que des types de chiffrement DES pour Kerberos. |
+| `131072`         | Préauthentification Non Requise : Le compte ne nécessite pas de préauthentification Kerberos. |
+| `262144`         | Mot de Passe Expiré : Le mot de passe du compte a expiré.                     |
+| `524288`         | Délégué Authentifié de Confiance : Le compte est de confiance pour s'authentifier lors de la délégation. |
+
+##### Exemple d'Utilisation
+
+Pour décoder l'attribut `userAccountControl`, vous pouvez utiliser PowerShell ou d'autres outils de script pour extraire et analyser la valeur. Chaque bit représente une propriété spécifique, et la valeur combinée indique la configuration globale du compte.
+
+##### Exemple :
+- Une valeur `userAccountControl` de `66560` correspond à :
+  - Compte Normal (`128`)
+  - Mot de Passe Non Expiré (`2048`)
+  - Carte à Puce Requise (`8192`)
+  - Non Délégué (`32768`).
+
+Comprendre ces valeurs permet d'évaluer et de gérer les paramètres de sécurité des comptes dans un environnement Active Directory.
+
+
+Je comprends maintenant que vous souhaitez l'intégralité du texte en format Markdown, y compris la partie finale. Voici la version complète en français dans un fichier Markdown (.md) :
+
+#### Correspondance des chaînes OID
+
+Les OID (Object Identifiers) sont des règles utilisées pour faire correspondre les valeurs binaires avec des attributs, comme mentionné ci-dessus. Pour LDAP et AD (Active Directory), il existe trois principales règles de correspondance :
+
+##### 1.2.840.113556.1.4.803
+
+Lorsque cette règle est utilisée, comme dans l'exemple ci-dessus, cela signifie que la valeur binaire doit correspondre complètement pour répondre aux exigences de recherche. Cela est idéal pour la correspondance d'un attribut unique.
+
+##### 1.2.840.113556.1.4.804
+
+Lors de l'utilisation de cette règle, cela signifie que nous voulons que les résultats montrent toute correspondance d'attribut si un bit dans la chaîne correspond. Cela fonctionne dans le cas où un objet a plusieurs attributs définis.
+
+##### 1.2.840.113556.1.4.1941
+
+Cette règle est utilisée pour faire correspondre les filtres qui s'appliquent au Distinguished Name (DN) d'un objet et recherche à travers toutes les entrées de propriété et d'appartenance.
+
+### Opérateurs Logiques
+
+Lors de la construction de chaînes de recherche, nous pouvons utiliser des opérateurs logiques pour combiner les valeurs de recherche. Les opérateurs `&`, `|` et `!` sont utilisés à cette fin. Par exemple, nous pouvons combiner plusieurs critères de recherche avec l'opérateur `&` (et) comme suit :
+
+```ldap
+(&(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=64))
+```
+
+L'exemple ci-dessus définit le premier critère selon lequel l'objet doit être un utilisateur et le combine avec la recherche d'une valeur de bit UAC (User Account Control) de 64 (Le mot de passe ne peut pas être modifié). Un utilisateur ayant cet attribut défini correspondrait au filtre. Vous pouvez aller encore plus loin et combiner plusieurs attributs comme suit :
+
+(&(1)(2)(3))
+
+Les opérateurs ! (non) et | (ou) peuvent fonctionner de manière similaire. Par exemple, notre filtre ci-dessus peut être modifié comme suit :
+
+(&(objectClass=user)(!userAccountControl:1.2.840.113556.1.4.803:=64))
+
+Cela rechercherait n'importe quel objet utilisateur qui n'a pas l'attribut "Le mot de passe ne peut pas être modifié" défini. Lorsqu'on pense aux utilisateurs, groupes et autres objets dans Active Directory (AD), notre capacité à effectuer des recherches avec des requêtes LDAP est assez étendue.
+
+Beaucoup de choses peuvent être faites avec les filtres UAC, les opérateurs et la correspondance d'attributs avec les règles OID. Pour l'instant, cette explication générale devrait suffire pour couvrir ce module. Pour plus d'informations et une exploration plus approfondie de l'utilisation de ce type de recherche par filtre, consultez le module LDAP Active Directory.
+
+Utilisation de notre point d'accès pour l'énumération avec des outils
+
+Nous avons maintenant utilisé notre point d'accès pour effectuer une énumération avec des informations d'identification via des outils sur des hôtes Linux et Windows, en utilisant des outils intégrés et des informations validées sur les hôtes et les domaines. Nous avons prouvé que nous pouvons accéder aux hôtes internes, que le "password spraying" et l'empoisonnement LLMNR/NBT-NS fonctionnent, et que nous pouvons utiliser des outils déjà présents sur les hôtes pour effectuer nos actions.
+
+Maintenant, nous allons aller plus loin et aborder une TTP (Tactique, Technique, Procédure) que tout pentester AD devrait avoir dans sa boîte à outils : Kerberoasting.
