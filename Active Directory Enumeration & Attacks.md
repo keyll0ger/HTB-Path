@@ -2,7 +2,7 @@
 
 # Sommaire
 
-1. Initial Enumeration <a name="initial-enumeration"></a>
+1. Initial Enumeration
    - External Recon and Principles
    - Initial Enumeration of the Domain
 2. Sniffing out a Foothold
@@ -168,7 +168,7 @@ Group3r is useful for auditing and finding security misconfigurations in AD Grou
 [ADRecon 	](https://github.com/adrecon/ADRecon)
 A tool used to extract various data from a target AD environment. The data can be output in Microsoft Excel format with summary views and analysis to assist with analysis and paint a picture of the environment's overall security state.
 
-## Initial Enumeration 
+## Initial Enumeration <a name="initial-enumeration">ici</a>
 
 ### Initial Enumeration of the Domain
 
