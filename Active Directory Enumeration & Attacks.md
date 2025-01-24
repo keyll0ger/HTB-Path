@@ -994,7 +994,7 @@ WhenChanged     : 2/26/2022 11:55:55 PM
 ```
 
 Cette commande PowerShell teste si l’utilisateur actuel a un accès administratif à l’ordinateur spécifié (ici, ACADEMY-EA-MS01). Utile pour vérifier les permissions administratives sur des machines locales ou distantes, ce qui peut aider à auditer les accès et les privilèges dans un environnement Active Directory.
-```
+```powershell
 Test-AdminAccess -ComputerName ACADEMY-EA-MS01
 
 ComputerName    IsAdmin
@@ -1003,7 +1003,8 @@ ACADEMY-EA-MS01    True
 ```
 
 Cette commande PowerShell utilise PowerView pour récupérer tous les utilisateurs dans Active Directory (AD) qui ont un Service Principal Name (SPN) défini. Utile pour identifier les comptes de service, car ces comptes sont souvent utilisés par des applications et des services pour s’authentifier auprès d’autres services.
-```
+
+```powershell
 Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 
 serviceprincipalname                          samaccountname
@@ -1021,14 +1022,16 @@ testspn2/kerberoast.inlanefreight.local       testspn2
 ```
 
 La commande Get-DomainUser de SharpView permet de récupérer des informations sur les utilisateurs dans Active Directory (AD). Elle offre de nombreux paramètres pour affiner la recherche et obtenir des détails spécifiques sur les utilisateurs.
-```
+
+```powershell
  .\SharpView.exe Get-DomainUser -Help
 
 Get_DomainUser -Identity <String[]> -DistinguishedName <String[]> -SamAccountName <String[]> -Name <String[]> -MemberDistinguishedName <String[]> -MemberName <String[]> -SPN <Boolean> -AdminCount <Boolean> -AllowDelegation <Boolean> -DisallowDelegation <Boolean> -TrustedToAuth <Boolean> -PreauthNotRequired <Boolean> -KerberosPreauthNotRequired <Boolean> -NoPreauth <Boolean> -Domain <String> -LDAPFilter <String> -Filter <String> -Properties <String[]> -SearchBase <String> -ADSPath <String> -Server <String> -DomainController <String> -SearchScope <SearchScope> -ResultPageSize <Int32> -ServerTimeLimit <Nullable`1> -SecurityMasks <Nullable`1> -Tombstone <Boolean> -FindOne <Boolean> -ReturnOne <Boolean> -Credential <NetworkCredential> -Raw <Boolean> -UACFilter <UACEnum>
 ```
 
 Cette commande SharpView récupère les informations sur un utilisateur spécifique dans Active Directory (AD) en utilisant son identité (ici, forend). Utile pour obtenir des détails précis sur cet utilisateur particulier, ce qui peut aider à gérer les comptes et les permissions dans un environnement AD.
-```
+
+```powershell
 PS C:\htb> .\SharpView.exe Get-DomainUser -Identity forend
 
 [Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
@@ -1064,12 +1067,12 @@ codepage                       : 0
 ```
 
 Cette commande utilise Snaffler pour scanner un domaine Active Directory (ici, inlanefreight.local) à la recherche de données sensibles et les enregistre dans un fichier de log (snaffler.log). Le paramètre -v data spécifie que la commande doit être exécutée en mode verbeux pour les données.
-```
+
+```powershell
 Snaffler.exe -s -d inlanefreight.local -o snaffler.log -v data
 ```
 
-```
-
+```powershell
 PS C:\htb> .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data
 
  .::::::.:::.    :::.  :::.    .-:::::'.-:::::':::    .,:::::: :::::::..
@@ -1109,7 +1112,8 @@ PS C:\htb> .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data
 ```
 
 Cette commande SharpHound collecte toutes les données disponibles dans un environnement Active Directory (AD) et les enregistre dans un fichier ZIP nommé ILFREIGHT.zip. Utile pour effectuer une analyse complète de l’AD, ce qui peut aider à identifier les relations et les permissions au sein du domaine.
-```
+
+```powershell
 PS C:\htb> .\SharpHound.exe -c All --zipfilename ILFREIGHT
 
 2022-04-18T13:58:22.1163680-07:00|INFORMATION|Resolved Collection Methods: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
@@ -1132,7 +1136,7 @@ Closing writers
 
 ### Load ActiveDirectory Module
 
-```
+```powershell
 PS C:\htb> Import-Module ActiveDirectory
 PS C:\htb> Get-Module
 
@@ -1146,7 +1150,7 @@ Script     2.0.0      PSReadline                          {Get-PSReadLineKeyHand
 
 ### Get Domain Info
 
-```
+```powershell
 PS C:\htb> Get-ADDomain
 
 AllowedDNSSuffixes                 : {}
@@ -1188,7 +1192,7 @@ UsersContainer                     : CN=Users,DC=INLANEFREIGHT,DC=LOCAL
 
 ### Get-ADUser
 
-```
+```powershell
 PS C:\htb> Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
 
 DistinguishedName    : CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
@@ -1220,7 +1224,7 @@ UserPrincipalName    :
 
 ###  Checking For Trust Relationships
 
-```
+```powershell
 PS C:\htb> Get-ADTrust -Filter *
 
 Direction               : BiDirectional
@@ -1274,7 +1278,7 @@ UsesRC4Encryption       : False
 
 ### Group Enumeration
 
-```
+```powershell
 Get-ADGroup -Filter * | select name
 
 name
@@ -1313,7 +1317,7 @@ Domain Admins
 
 ### Group Membership
 
-```
+```powershell
 PS C:\htb> Get-ADGroup -Identity "Backup Operators"
 
 DistinguishedName : CN=Backup Operators,CN=Builtin,DC=INLANEFREIGHT,DC=LOCAL
@@ -1328,7 +1332,7 @@ SID               : S-1-5-32-551
 
 ### Trust Enumeration
 
-```
+```powershell
 PS C:\htb> Get-DomainTrustMapping
 
 SourceName      : INLANEFREIGHT.LOCAL
@@ -1357,7 +1361,7 @@ WhenChanged     : 2/26/2022 11:55:55 PM
 ```
 ### Testing for Local Admin Access
 
-```
+```powershell
 PS C:\htb> Test-AdminAccess -ComputerName ACADEMY-EA-MS01
 
 ComputerName    IsAdmin
@@ -1367,7 +1371,7 @@ ACADEMY-EA-MS01    True
 
 ### Finding Users With SPN Set
 
-```
+```powershell
 PS C:\htb> Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 
 serviceprincipalname                          samaccountname
@@ -1417,7 +1421,7 @@ Voici quelques-unes des façons dont PowerShell peut nous aider.
 
 ### Downgrade Powershell
 
-```
+```powershell
 PS C:\htb> Get-host
 
 Name             : ConsoleHost
@@ -1459,7 +1463,7 @@ Script     2.0.0      PSReadline                          {Get-PSReadLineKeyHand
 
 ### Firewall Checks
 
-```
+```powershell
 PS C:\htb> netsh advfirewall show allprofiles
 
 Domain Profile Settings:
@@ -1513,7 +1517,7 @@ MaxFileSize                           4096
 
 ### Windows Defender Check (from CMD.exe) 
 
-```
+```powershell
 C:\htb> sc query windefend
 
 SERVICE_NAME: windefend
@@ -1528,7 +1532,7 @@ SERVICE_NAME: windefend
 
 ### Get-MpComputerStatus
 
-```
+```powershell
 PS C:\htb> Get-MpComputerStatus
 
 AMEngineVersion                  : 1.1.19000.8
@@ -1761,11 +1765,12 @@ The command completed successfully.
 
 ### Dsquery
 
-Dsquery is a helpful command-line tool that can be utilized to find Active Directory objects. The queries we run with this tool can be easily replicated with tools like BloodHound and PowerView, but we may not always have those tools at our disposal, as discussed at the beginning of the section. But, it is a likely tool that domain sysadmins are utilizing in their environment. With that in mind, dsquery will exist on any host with the Active Directory Domain Services Role installed, and the dsquery DLL exists on all modern Windows systems by default now and can be found at `C:\Windows\System32\dsquery.dll`.
+Dsquery est un outil de ligne de commande utile qui peut être utilisé pour trouver des objets Active Directory. Les requêtes que nous exécutons avec cet outil peuvent être facilement reproduites avec des outils comme BloodHound et PowerView, mais nous n'avons pas toujours ces outils à notre disposition, comme mentionné au début de la section. Cependant, il est probable que les administrateurs système de domaine utilisent cet outil dans leur environnement. Avec cela en tête, dsquery existera sur tout hôte avec le rôle Active Directory Domain Services installé, et la DLL dsquery existe par défaut sur tous les systèmes Windows modernes et peut être trouvée à `C:\Windows\System32\dsquery.dll`.
 
 #### Dsquery DLL
 
-All we need is elevated privileges on a host or the ability to run an instance of Command Prompt or PowerShell from a SYSTEM context. Below, we will show the basic search function with dsquery and a few helpful search filters.
+Tout ce dont nous avons besoin, ce sont des privilèges élevés sur un hôte ou la capacité d'exécuter une instance de l'invite de commande ou de PowerShell à partir d'un contexte SYSTEM. Ci-dessous, nous montrerons la fonction de recherche de base avec dsquery et quelques filtres de recherche utiles.
+
 
 #### User Search
 
@@ -1791,4 +1796,34 @@ PS C:\htb> dsquery user
 "CN=Michael Shoemaker,OU=Human Resources,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
 "CN=Arlene Slater,OU=Human Resources,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
 "CN=Kelsey Prentiss,OU=Human Resources,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+```
 
+
+#### Computer Search
+
+
+```powershell
+PS C:\htb> dsquery computer
+
+"CN=ACADEMY-EA-DC01,OU=Domain Controllers,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=ACADEMY-EA-MS01,OU=Web Servers,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=ACADEMY-EA-MX01,OU=Mail,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=SQL01,OU=SQL Servers,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=ILF-XRG,OU=Critical,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=MAINLON,OU=Critical,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=CISERVER,OU=Critical,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=INDEX-DEV-LON,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=SQL-0253,OU=SQL Servers,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0615,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0616,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0617,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0618,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0619,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0620,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0621,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0622,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=NYC-0623,OU=NYC,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=LON-0455,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=LON-0456,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=LON-0457,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
+"CN=LON-0458,OU=LON,OU=Servers,OU=Computers,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL"
