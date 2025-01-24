@@ -2500,3 +2500,66 @@ Utilisation de notre point d'accès pour l'énumération avec des outils
 Nous avons maintenant utilisé notre point d'accès pour effectuer une énumération avec des informations d'identification via des outils sur des hôtes Linux et Windows, en utilisant des outils intégrés et des informations validées sur les hôtes et les domaines. Nous avons prouvé que nous pouvons accéder aux hôtes internes, que le "password spraying" et l'empoisonnement LLMNR/NBT-NS fonctionnent, et que nous pouvons utiliser des outils déjà présents sur les hôtes pour effectuer nos actions.
 
 Maintenant, nous allons aller plus loin et aborder une TTP (Tactique, Technique, Procédure) que tout pentester AD devrait avoir dans sa boîte à outils : Kerberoasting.
+
+```powershell
+PS C:\Tools> dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=2))" -attr description
+```
+
+## Cooking with the Fire
+
+### Kerberoasting from Linux
+
+#### Notre énumération jusqu'à présent
+
+Notre énumération jusqu'à ce point nous a donné une vue d'ensemble du domaine et des problèmes potentiels. Nous avons énuméré les comptes utilisateurs et pouvons voir que certains sont configurés avec des noms principaux de service (SPN). Voyons comment nous pouvons exploiter cela pour nous déplacer latéralement et escalader les privilèges dans le domaine cible.
+
+###### Vue d'ensemble du Kerberoasting
+
+Le **Kerberoasting** est une technique de mouvement latéral et d'escalade de privilèges dans les environnements Active Directory. Cette attaque cible les comptes associés aux **Service Principal Names** (SPN). Les SPN sont des identifiants uniques que Kerberos utilise pour associer une instance de service à un compte de service sous lequel le service s'exécute. Les comptes de domaine sont souvent utilisés pour exécuter des services afin de contourner les limitations d'authentification réseau des comptes intégrés tels que **NT AUTHORITY\LOCAL SERVICE**. Tout utilisateur de domaine peut demander un ticket Kerberos pour n'importe quel compte de service dans le même domaine. Cela est également possible à travers les relations de confiance entre forêts si l'authentification est autorisée à travers cette frontière de confiance. 
+
+Tout ce dont vous avez besoin pour effectuer une attaque Kerberoasting est le mot de passe en clair (ou le hachage NTLM) d'un compte, un shell dans le contexte d'un compte utilisateur de domaine, ou un accès de niveau SYSTEM sur un hôte joint au domaine.
+
+Les comptes de domaine exécutant des services sont souvent des administrateurs locaux, sinon des comptes de domaine hautement privilégiés. En raison de la nature distribuée des systèmes, des services interagissant et des transferts de données associés, les comptes de service peuvent se voir accorder des privilèges d'administrateur sur plusieurs serveurs dans l'entreprise. De nombreux services nécessitent des privilèges élevés sur divers systèmes, c'est pourquoi les comptes de service sont souvent ajoutés à des groupes privilégiés, tels que **Domain Admins**, soit directement, soit via une appartenance imbriquée. Trouver des SPN associés à des comptes hautement privilégiés dans un environnement Windows est très courant.
+
+Récupérer un ticket Kerberos pour un compte avec un SPN ne permet pas en soi d'exécuter des commandes dans le contexte de ce compte. Cependant, le ticket (TGS-REP) est crypté avec le hachage NTLM du compte de service, de sorte que le mot de passe en clair peut potentiellement être obtenu en soumettant ce ticket à une attaque par force brute hors ligne avec un outil tel que **Hashcat**.
+
+Les comptes de service sont souvent configurés avec des mots de passe faibles ou réutilisés pour simplifier l'administration, et parfois le mot de passe est identique au nom d'utilisateur. Si le mot de passe d'un compte de service de serveur SQL de domaine est déchiffré, vous vous retrouverez probablement en tant qu'administrateur local sur plusieurs serveurs, voire même administrateur de domaine. Même si le déchiffrement d'un ticket obtenu via une attaque Kerberoasting donne un compte utilisateur à faibles privilèges, nous pouvons l'utiliser pour fabriquer des tickets de service pour le service spécifié dans le SPN. Par exemple, si le SPN est défini sur **MSSQL/SRV01**, nous pouvons accéder au service MSSQL en tant que **sysadmin**, activer la procédure étendue **xp_cmdshell** et obtenir l'exécution de code sur le serveur SQL cible.
+
+Pour un aperçu intéressant de l'origine de cette technique, consultez la présentation de **Tim Medin** donnée lors de **Derbycon 2014**, où il a présenté le Kerberoasting au monde.
+
+
+#### Kerberoasting - Réalisation de l'attaque
+
+Selon votre position dans un réseau, cette attaque peut être réalisée de plusieurs manières :
+
+- Depuis un hôte Linux non joint au domaine en utilisant des identifiants valides d'utilisateur de domaine.
+- Depuis un hôte Linux joint au domaine en tant que root après avoir récupéré le fichier **keytab**.
+- Depuis un hôte Windows joint au domaine authentifié en tant qu'utilisateur de domaine.
+- Depuis un hôte Windows joint au domaine avec un shell dans le contexte d'un compte de domaine.
+- En tant que **SYSTEM** sur un hôte Windows joint au domaine.
+- Depuis un hôte Windows non joint au domaine en utilisant **runas /netonly**.
+
+Plusieurs outils peuvent être utilisés pour réaliser l'attaque :
+
+- **Impacket’s GetUserSPNs.py** depuis un hôte Linux non joint au domaine.
+- Une combinaison du binaire Windows intégré **setspn.exe**, PowerShell et Mimikatz.
+- Depuis Windows, en utilisant des outils tels que **PowerView**, **Rubeus** et d'autres scripts PowerShell.
+
+Obtenir un ticket **TGS** via Kerberoasting ne garantit pas l'obtention de credentials valides, et le ticket doit toujours être craqué hors ligne avec un outil tel que **Hashcat** pour obtenir le mot de passe en clair. Les tickets **TGS** prennent plus de temps à être craqués que d'autres formats tels que les hachages **NTLM**, donc souvent, à moins qu'un mot de passe faible soit défini, il peut être difficile, voire impossible, d'obtenir le mot de passe en clair en utilisant un équipement standard de craquage.
+
+#### Efficacité de l'attaque
+
+Bien que cela puisse être un excellent moyen de se déplacer latéralement ou d'escalader les privilèges dans un domaine, le **Kerberoasting** et la présence de **SPN** ne garantissent pas un quelconque niveau d'accès. Nous pourrions nous trouver dans un environnement où nous craquons un ticket **TGS** et obtenons immédiatement un accès **Domain Admin**, ou obtenir des credentials qui nous aident à avancer sur le chemin de la compromission du domaine. D'autres fois, nous pourrions réaliser l'attaque et récupérer de nombreux tickets **TGS**, dont certains que nous pouvons craquer, mais aucun de ceux qui sont craqués ne correspond à des utilisateurs privilégiés, et l'attaque ne nous donne aucun accès supplémentaire.
+
+Dans les deux premiers cas, je rédigerais probablement la découverte comme étant à haut risque dans mon rapport. Dans le troisième cas, nous pourrions réaliser un **Kerberoasting** et ne pas réussir à craquer un seul ticket **TGS**, même après des jours d'essais de craquage avec **Hashcat** sur une machine puissante de craquage de mots de passe GPU. Dans ce scénario, je rédigerais toujours la découverte, mais je la classerais comme un problème à risque moyen pour avertir le client du risque que représentent les **SPN** dans le domaine (ces mots de passe forts pourraient toujours être changés pour quelque chose de plus faible, ou un attaquant très déterminé pourrait être capable de craquer les tickets en utilisant **Hashcat**), tout en tenant compte du fait que je n'ai pas pu prendre le contrôle de comptes de domaine en utilisant l'attaque.
+
+Il est essentiel de faire ces distinctions dans nos rapports et de savoir quand il est acceptable de réduire le risque d'une découverte lorsque des contrôles de mitigation (comme des mots de passe très forts) sont en place.
+
+##### Réalisation de l'attaque
+
+Les attaques de **Kerberoasting** sont désormais facilement réalisées à l'aide d'outils et de scripts automatisés. Nous allons aborder la réalisation de cette attaque de différentes manières, à la fois depuis un hôte Linux et un hôte Windows attaqué. Commençons par expliquer comment procéder depuis un hôte Linux. La section suivante détaillera une méthode "semi-manuelle" pour réaliser l'attaque, ainsi que deux attaques rapides et automatisées utilisant des outils open-source courants, le tout depuis un hôte Windows attaqué.
+
+
+
+
+
