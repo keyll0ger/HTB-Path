@@ -6,7 +6,6 @@
    - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
 2. [Sniffing out a Foothold](#sniffing-out-a-foothold)
    - [LLMNR/NBT-NS Poisoning from Linux](#llmnr/nbt-ns-poisoning-from-linux)
-   - [LLMNR/NBT-NS Poisoning from Windows](#llmnr/nbt-ns-poisoning-from-Windows)
 3. Sighting In, Hunting For A User
    - Password Spraying Overview
    - Enumerating & Retrieving Password Policies
@@ -148,6 +147,8 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_
 2021/11/17 23:01:56 >  Done! Tested 48705 usernames (56 valid) in 9.940 seconds
 
 ```
+
+### LLMNR/NBT-NS Poisoning from Linux
 ```
 ifconfig                                                                                                                                                            
 docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
@@ -264,6 +265,7 @@ sudo responder -I ens224
 ........................................
 
 ```
+### Enumerating the Password Policy - from Linux - Credentialed
 
 
  Utilise enum4linux pour énumérer les utilisateurs sur l’hôte 172.16.5.5 et filtre les résultats pour afficher uniquement les noms d’utilisateur.
@@ -308,7 +310,7 @@ sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 ```
 ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))"  | grep sAMAccountName: | cut -f2 -d" "
 ```
-
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 Utilise kerbrute pour énumérer les utilisateurs dans le domaine INLANEFREIGHT en utilisant le contrôleur de domaine INLANEFREIGHT.LOCAL et le fichier de noms d’utilisateur jsmith.txt.
 ```
