@@ -3,11 +3,10 @@
 # Sommaire
 
 1. [Initial Enumeration](#initial-enumeration)
-   - [External Recon and Principles](#external-recon-and-principles)
    - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
-2. Sniffing out a Foothold
-   - LLMNR/NBT-NS Poisoning from Linux
-   - LLMNR/NBT-NS Poisoning from Windows
+2. [Sniffing out a Foothold](#sniffing-out-a-foothold)
+   - [LLMNR/NBT-NS Poisoning from Linux](#llmnr/nbt-ns-poisoning-from-linux)
+   - [LLMNR/NBT-NS Poisoning from Windows](#llmnr/nbt-ns-poisoning-from-Windows)
 3. Sighting In, Hunting For A User
    - Password Spraying Overview
    - Enumerating & Retrieving Password Policies
