@@ -1641,3 +1641,82 @@ Windows Management Instrumentation (WMI) est un moteur de script largement utili
 | `wmic sysaccount list /format:list` | Affiche des informations sur tous les comptes système utilisés comme comptes de service |
 
 
+```powershell
+C:\htb> wmic ntdomain get Caption,Description,DnsForestName,DomainName,DomainControllerAddress
+
+Caption          Description      DnsForestName           DomainControllerAddress  DomainName
+ACADEMY-EA-MS01  ACADEMY-EA-MS01
+INLANEFREIGHT    INLANEFREIGHT    INLANEFREIGHT.LOCAL     \\172.16.5.5             INLANEFREIGHT
+LOGISTICS        LOGISTICS        INLANEFREIGHT.LOCAL     \\172.16.5.240           LOGISTICS
+FREIGHTLOGISTIC  FREIGHTLOGISTIC  FREIGHTLOGISTICS.LOCAL  \\172.16.5.238           FREIGHTLOGISTIC
+```
+
+### Commandes Net
+
+Les commandes Net peuvent être bénéfiques lorsque nous tentons d'énumérer des informations à partir du domaine. Ces commandes peuvent être utilisées pour interroger l'hôte local et les hôtes distants, de la même manière que les capacités fournies par WMI. Nous pouvons lister des informations telles que :
+
+- Utilisateurs locaux et de domaine
+- Groupes
+- Hôtes
+- Utilisateurs spécifiques dans les groupes
+- Contrôleurs de domaine
+- Exigences de mot de passe
+
+Nous couvrirons quelques exemples ci-dessous. Gardez à l'esprit que les commandes net.exe sont généralement surveillées par les solutions EDR et peuvent rapidement révéler notre emplacement si notre évaluation comporte une composante d'évasion. Certaines organisations configureront même leurs outils de surveillance pour déclencher des alertes si certaines commandes sont exécutées par des utilisateurs dans des UO spécifiques, comme le compte d'un associé marketing exécutant des commandes telles que whoami et net localgroup administrators, etc. Cela pourrait être un signal d'alarme évident pour quiconque surveille fortement le réseau.
+
+#### Tableau des Commandes Net Utiles
+
+| Commande | Description |
+|----------|-------------|
+| `net accounts` | Informations sur les exigences de mot de passe |
+| `net accounts /domain` | Politique de mot de passe et de verrouillage |
+| `net group /domain` | Informations sur les groupes de domaine |
+| `net group "Domain Admins" /domain` | Liste des utilisateurs avec des privilèges d'administrateur de domaine |
+| `net group "domain computers" /domain` | Liste des PC connectés au domaine |
+| `net group "Domain Controllers" /domain` | Liste des comptes PC des contrôleurs de domaine |
+| `net group <domain_group_name> /domain` | Utilisateur appartenant au groupe |
+| `net groups /domain` | Liste des groupes de domaine |
+| `net localgroup` | Tous les groupes disponibles |
+| `net localgroup administrators /domain` | Liste des utilisateurs appartenant au groupe des administrateurs dans le domaine (le groupe Domain Admins est inclus ici par défaut) |
+| `net localgroup Administrators` | Informations sur un groupe (administrateurs) |
+| `net localgroup administrators [username] /add` | Ajouter un utilisateur aux administrateurs |
+| `net share` | Vérifier les partages actuels |
+| `net user <ACCOUNT_NAME> /domain` | Obtenir des informations sur un utilisateur dans le domaine |
+| `net user /domain` | Lister tous les utilisateurs du domaine |
+| `net user %username%` | Informations sur l'utilisateur actuel |
+| `net use x: \\computer\share` | Monter le partage localement |
+| `net view` | Obtenir une liste des ordinateurs |
+| `net view /all /domain[:domainname]` | Partages sur les domaines |
+| `net view \\computer /ALL` | Lister les partages d'un ordinateur |
+| `net view /domain` | Liste des PC du domaine |
+
+#### Liste des Groupes de Domaine
+
+```powershell
+PS C:\htb> net group /domain
+
+The request will be processed at a domain controller for domain INLANEFREIGHT.LOCAL.
+
+Group Accounts for \\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+-------------------------------------------------------------------------------
+*$H25000-1RTRKC5S507F
+*Accounting
+*Barracuda_all_access
+*Barracuda_facebook_access
+*Barracuda_parked_sites
+*Barracuda_youtube_exempt
+*Billing
+*Billing_users
+*Calendar Access
+*CEO
+*CFO
+*Cloneable Domain Controllers
+*Collaboration_users
+*Communications_users
+*Compliance Management
+*Computer Group Management
+*Contractors
+*CTO
+
+<SNIP>
+```
