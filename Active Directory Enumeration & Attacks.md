@@ -1550,7 +1550,7 @@ Domain Admins
 <SNIP>
 ```
 
-### Group Membership
+### Detailed Group Info
 
 ```powershell
 PS C:\htb> Get-ADGroup -Identity "Backup Operators"
@@ -1563,6 +1563,140 @@ ObjectClass       : group
 ObjectGUID        : 6276d85d-9c39-4b7c-8449-cad37e8abc38
 SamAccountName    : Backup Operators
 SID               : S-1-5-32-551
+```
+
+### Group Membership
+
+```powershell
+PS C:\htb> Get-ADGroupMember -Identity "Backup Operators"
+
+distinguishedName : CN=BACKUPAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+name              : BACKUPAGENT
+objectClass       : user
+objectGUID        : 2ec53e98-3a64-4706-be23-1d824ff61bed
+SamAccountName    : backupagent
+SID               : S-1-5-21-3842939050-3880317879-2865463114-5220
+```
+
+### PowerView
+
+PowerView est un outil écrit en PowerShell pour nous aider à obtenir une connaissance situationnelle dans un environnement AD. Tout comme BloodHound, il permet d'identifier où les utilisateurs sont connectés sur un réseau, d'énumérer les informations de domaine telles que les utilisateurs, les ordinateurs, les groupes, les ACL, les trusts, de rechercher des partages de fichiers et des mots de passe, d'effectuer des attaques de type Kerberoasting, et plus encore. C'est un outil très polyvalent qui peut nous fournir une grande visibilité sur la posture de sécurité du domaine de notre client. Il nécessite plus de travail manuel pour déterminer les mauvaises configurations et les relations au sein du domaine que BloodHound, mais, lorsqu'il est utilisé correctement, il peut nous aider à identifier des mauvaises configurations subtiles.
+
+Examinons certaines des capacités de PowerView et voyons quelles données il renvoie. Le tableau ci-dessous décrit certaines des fonctions les plus utiles offertes par PowerView.
+
+| Commande | Description |
+| --- | --- |
+| `Export-PowerViewCSV` | Ajouter les résultats à un fichier CSV |
+| `ConvertTo-SID` | Convertir un nom d'utilisateur ou de groupe en sa valeur SID |
+| `Get-DomainSPNTicket` | Demande le ticket Kerberos pour un compte SPN spécifié |
+
+#### Fonctions de domaine/LDAP :
+
+| Commande | Description |
+| --- | --- |
+| `Get-Domain` | Renvoie l'objet AD pour le domaine actuel (ou spécifié) |
+| `Get-DomainController` | Renvoie une liste des contrôleurs de domaine pour le domaine spécifié |
+| `Get-DomainUser` | Renvoie tous les utilisateurs ou des objets utilisateur spécifiques dans AD |
+| `Get-DomainComputer` | Renvoie tous les ordinateurs ou des objets ordinateur spécifiques dans AD |
+| `Get-DomainGroup` | Renvoie tous les groupes ou des objets groupe spécifiques dans AD |
+| `Get-DomainOU` | Recherche tous les objets OU ou des objets OU spécifiques dans AD |
+| `Find-InterestingDomainAcl` | Trouve les ACL d'objets dans le domaine avec des droits de modification définis sur des objets non intégrés |
+| `Get-DomainGroupMember` | Renvoie les membres d'un groupe de domaine spécifique |
+| `Get-DomainFileServer` | Renvoie une liste de serveurs fonctionnant probablement comme serveurs de fichiers |
+| `Get-DomainDFSShare` | Renvoie une liste de tous les systèmes de fichiers distribués pour le domaine actuel (ou spécifié) |
+
+#### Fonctions GPO :
+
+| Commande | Description |
+| --- | --- |
+| `Get-DomainGPO` | Renvoie tous les GPO ou des objets GPO spécifiques dans AD |
+| `Get-DomainPolicy` | Renvoie la politique de domaine par défaut ou la politique du contrôleur de domaine pour le domaine actuel |
+
+#### Fonctions d'énumération des ordinateurs :
+
+| Commande | Description |
+| --- | --- |
+| `Get-NetLocalGroup` | Énumère les groupes locaux sur la machine locale ou une machine distante |
+| `Get-NetLocalGroupMember` | Énumère les membres d'un groupe local spécifique |
+| `Get-NetShare` | Renvoie les partages ouverts sur la machine locale (ou une machine distante) |
+| `Get-NetSession` | Renvoie les informations de session pour la machine locale (ou une machine distante) |
+| `Test-AdminAccess` | Teste si l'utilisateur actuel a un accès administratif à la machine locale (ou une machine distante) |
+
+#### Fonctions 'Meta' Threaded :
+
+| Commande | Description |
+| --- | --- |
+| `Find-DomainUserLocation` | Trouve les machines où des utilisateurs spécifiques sont connectés |
+| `Find-DomainShare` | Trouve des partages accessibles sur les machines du domaine |
+| `Find-InterestingDomainShareFile` | Recherche des fichiers correspondant à des critères spécifiques sur des partages lisibles dans le domaine |
+| `Find-LocalAdminAccess` | Trouve des machines sur le domaine local où l'utilisateur actuel a un accès administrateur local |
+
+#### Fonctions de confiance de domaine :
+
+| Commande | Description |
+| --- | --- |
+| `Get-DomainTrust` | Renvoie les trusts de domaine pour le domaine actuel ou un domaine spécifié |
+| `Get-ForestTrust` | Renvoie tous les trusts de forêt pour la forêt actuelle ou une forêt spécifiée |
+| `Get-DomainForeignUser` | Énumère les utilisateurs qui sont dans des groupes en dehors du domaine de l'utilisateur |
+| `Get-DomainForeignGroupMember` | Énumère les groupes avec des utilisateurs en dehors du domaine du groupe et renvoie chaque membre étranger |
+| `Get-DomainTrustMapping` | Énumère tous les trusts pour le domaine actuel et tous les autres vus |
+
+###Domain User Information
+
+```powershell
+PS C:\htb> Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
+
+name                 : Matthew Morgan
+samaccountname       : mmorgan
+description          :
+memberof             : {CN=VPN Users,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=Shared Calendar
+                       Read,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=Printer Access,OU=Security
+                       Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=File Share H Drive,OU=Security
+                       Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL...}
+whencreated          : 10/27/2021 5:37:06 PM
+pwdlastset           : 11/18/2021 10:02:57 AM
+lastlogontimestamp   : 2/27/2022 6:34:25 PM
+accountexpires       : NEVER
+admincount           : 1
+userprincipalname    : mmorgan@inlanefreight.local
+serviceprincipalname :
+mail                 :
+useraccountcontrol   : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
+```
+### Recursive Group Membership
+
+```powershell
+PS C:\htb>  Get-DomainGroupMember -Identity "Domain Admins" -Recurse
+
+GroupDomain             : INLANEFREIGHT.LOCAL
+GroupName               : Domain Admins
+GroupDistinguishedName  : CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+MemberDomain            : INLANEFREIGHT.LOCAL
+MemberName              : svc_qualys
+MemberDistinguishedName : CN=svc_qualys,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberObjectClass       : user
+MemberSID               : S-1-5-21-3842939050-3880317879-2865463114-5613
+
+GroupDomain             : INLANEFREIGHT.LOCAL
+GroupName               : Domain Admins
+GroupDistinguishedName  : CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+MemberDomain            : INLANEFREIGHT.LOCAL
+MemberName              : sp-admin
+MemberDistinguishedName : CN=Sharepoint Admin,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberObjectClass       : user
+MemberSID               : S-1-5-21-3842939050-3880317879-2865463114-5228
+
+GroupDomain             : INLANEFREIGHT.LOCAL
+GroupName               : Secadmins
+GroupDistinguishedName  : CN=Secadmins,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberDomain            : INLANEFREIGHT.LOCAL
+MemberName              : spong1990
+MemberDistinguishedName : CN=Maggie
+                          Jablonski,OU=Operations,OU=Logistics-HK,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+MemberObjectClass       : user
+MemberSID               : S-1-5-21-3842939050-3880317879-2865463114-1965
+
+<SNIP>  
 ```
 
 ### Trust Enumeration
@@ -1623,7 +1757,7 @@ testspn/kerberoast.inlanefreight.local        testspn
 testspn2/kerberoast.inlanefreight.local       testspn2
 
 ```
-
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX SHARPVIEW
 ## Living Off the Land
 
 ### Commandes de Base pour l'Énumération
