@@ -8,8 +8,20 @@
 2. Sniffing out a Foothold
    - LLMNR/NBT-NS Poisoning from Linux
    - LLMNR/NBT-NS Poisoning from Windows
-3. Section 3
-4. 
+3. Sighting In, Hunting For A User
+   - Password Spraying Overview
+   - Enumerating & Retrieving Password Policies
+   - Password Spraying - Making a Target User List
+4. Spray Responsibly
+   -Internal Password Spraying from Linux
+   -Internal Password Spraying from Windows
+5. Deeper Down th Rabbit Hole
+   -Enumerating Security Controls
+   -Credentialed Enumeration from Windows
+   -Credentialed Enumeration from Linux
+   -Living Off the Land
+   
+   
 [SharpView]https://github.com/dmchell/SharpView.git
 [PowerView]https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
 
@@ -155,6 +167,10 @@ Group3r is useful for auditing and finding security misconfigurations in AD Grou
 
 [ADRecon 	](https://github.com/adrecon/ADRecon)
 A tool used to extract various data from a target AD environment. The data can be output in Microsoft Excel format with summary views and analysis to assist with analysis and paint a picture of the environment's overall security state.
+
+## Initial Enumeration 
+
+### Initial Enumeration of the Domain
 
 Cette commande capture et affiche les paquets réseau sur l’interface ens224
 ```
