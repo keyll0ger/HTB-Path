@@ -1326,3 +1326,75 @@ SamAccountName    : Backup Operators
 SID               : S-1-5-32-551
 ```
 
+### Trust Enumeration
+
+```
+PS C:\htb> Get-DomainTrustMapping
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : LOGISTICS.INLANEFREIGHT.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 6:20:22 PM
+WhenChanged     : 2/26/2022 11:55:55 PM
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : FREIGHTLOGISTICS.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : FOREST_TRANSITIVE
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 8:07:09 PM
+WhenChanged     : 2/27/2022 12:02:39 AM
+
+SourceName      : LOGISTICS.INLANEFREIGHT.LOCAL
+TargetName      : INLANEFREIGHT.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 6:20:22 PM
+WhenChanged     : 2/26/2022 11:55:55 PM 
+```
+### Testing for Local Admin Access
+
+```
+PS C:\htb> Test-AdminAccess -ComputerName ACADEMY-EA-MS01
+
+ComputerName    IsAdmin
+------------    -------
+ACADEMY-EA-MS01    True 
+```
+
+### Finding Users With SPN Set
+
+```
+PS C:\htb> Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
+
+serviceprincipalname                          samaccountname
+--------------------                          --------------
+adfsconnect/azure01.inlanefreight.local       adfs
+backupjob/veam001.inlanefreight.local         backupagent
+d0wngrade/kerberoast.inlanefreight.local      d0wngrade
+kadmin/changepw                               krbtgt
+MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433 sqldev
+MSSQLSvc/SPSJDB.inlanefreight.local:1433      sqlprod
+MSSQLSvc/SQL-CL01-01inlanefreight.local:49351 sqlqa
+sts/inlanefreight.local                       solarwindsmonitor
+testspn/kerberoast.inlanefreight.local        testspn
+testspn2/kerberoast.inlanefreight.local       testspn2
+
+```
+
+## Living Off the Land
+
+### Basic Enumeration Commands
+
+| Command | Result |
+|---------|--------|
+| `hostname` | Prints the PC's Name |
+| `[System.Environment]::OSVersion.Version` | Prints out the OS version and revision level |
+| `wmic qfe get Caption,Description,HotFixID,InstalledOn` | Prints the patches and hotfixes applied to the host |
+| `ipconfig /all` | Prints out network adapter state and configurations |
+| `set` | Displays a list of environment variables for the current session (ran from CMD-prompt) |
+| `echo %USERDOMAIN%` | Displays the domain name to which the host belongs (ran from CMD-prompt) |
+| `echo %logonserver%` | Prints out the name of the Domain controller the host checks in with (ran from CMD-prompt) |
