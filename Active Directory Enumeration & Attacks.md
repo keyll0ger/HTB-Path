@@ -149,7 +149,7 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_
 ```
 ## Sniffing out a Foothold
 
-### LLMNR/NBT NS Poisoning from Linux
+### LLMNR NBT NS Poisoning from Linux
 ```bash
 ifconfig                                                                                                                                                            
 docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
