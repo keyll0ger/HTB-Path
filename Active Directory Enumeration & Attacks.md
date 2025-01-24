@@ -13,13 +13,13 @@
    - Enumerating & Retrieving Password Policies
    - Password Spraying - Making a Target User List
 4. Spray Responsibly
-   -Internal Password Spraying from Linux
-   -Internal Password Spraying from Windows
+   - Internal Password Spraying from Linux
+   - Internal Password Spraying from Windows
 5. Deeper Down th Rabbit Hole
-   -Enumerating Security Controls
-   -Credentialed Enumeration from Windows
-   -Credentialed Enumeration from Linux
-   -Living Off the Land
+   - Enumerating Security Controls
+   - Credentialed Enumeration from Windows
+   - Credentialed Enumeration from Linux
+   - Living Off the Land
    
    
 [SharpView]https://github.com/dmchell/SharpView.git
