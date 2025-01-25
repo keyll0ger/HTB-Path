@@ -2888,8 +2888,8 @@ Pour lister toutes les options disponibles :
 Rubeus offre une flexibilité remarquable pour effectuer des attaques Kerberoasting, avec de nombreuses options adaptées à divers scénarios. Familiarisez-vous avec ses fonctionnalités pour maximiser son efficacité tout en minimisant les risques de détection.
 
 
-# An ACE in the Hole
+## An ACE in the Hole
 
 ![image](https://github.com/user-attachments/assets/2c1e6280-d4e4-4ddb-a42c-7f54fd3d21e7)
 
-## ACE Abuse Primer
+### ACE Abuse Primer
