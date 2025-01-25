@@ -4,42 +4,53 @@
 
 1. [Initial Enumeration](#initial-enumeration)
    - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
+     
 2. [Sniffing out a Foothold](#sniffing-out-a-foothold)
    - [LLMNR/NBT-NS Poisoning from Linux](#llmnr-nbt-ns-poisoning-from-linux)
+     
 3. [Sighting In, Hunting For A User](#sighting-in-hunting-for-a-user)
    - [Enumerating & Retrieving Password Policies](#)
    - [Password Spraying - Making a Target User List](#)
+     
 5. [Spray Responsibly](#spray-responsibly)
    - Internal Password Spraying from Linux
    - Internal Password Spraying from Windows
+     
 6. [Deeper Down the Rabbit Hole](#deeper-down-the-rabbit-hole)
    - Enumerating Security Controls
    - Credentialed Enumeration from Windows
    - Credentialed Enumeration from Linux
    - Living Off the Land
+     
 7. [Cooking with the Fire](#cooking-with-the-fire)
    - Kerberoasting from Linux
    - Kerberoasting from Windows
+     
 8.An ACE in the Hole
    - ACL Abuse Primer
    - ACL Enumeration
    - ACL Abuse Tactics
    - DCSync
+     
 9. Stacking The Deck
    - Privileged Access
    - Kerberos "Double Hop" Problem
    - Bleeping Edge Vulnerabilities
    - Miscellaneous Misconfigurations
+     
 10. Why So Trusting ?
     - Domain Trust Primer
     - Attacking Domain Trusts - Child -> Parent Trusts - from Windows
     - Attacking Domain Trusts - Child -> Parent Trusts - from Linux
+      
 11. Breaking Down Boundaries
     - Attacking Domain Trusts - Cross-Forest Trust Abuse - from Windows
     - Attacking Domain Trusts - Cross-Forest Trust Abuse - from Linux
+      
 12. Defensive Considerations
     - Hardening Active Directory
     - Additional AD Auditing Techniques
+      
 13. Skill Assessment - Final Showdown
     - AD Enumeration & Attacks - Skills Assessment Part I
     - AD Enumeration & Attacks - Skills Assessment Part II
