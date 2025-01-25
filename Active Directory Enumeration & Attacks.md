@@ -26,7 +26,7 @@
    - Kerberoasting from Linux
    - Kerberoasting from Windows
      
-8.An ACE in the Hole
+8. An ACE in the Hole
    - ACL Abuse Primer
    - ACL Enumeration
    - ACL Abuse Tactics
