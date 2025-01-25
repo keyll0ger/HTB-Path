@@ -9,24 +9,26 @@
 3. [Sighting In, Hunting For A User](#sighting-in-hunting-for-a-user)
    - [Enumerating & Retrieving Password Policies](#)
    - [Password Spraying - Making a Target User List](#)
-5. Spray Responsibly
+5. [Spray Responsibly](#spray-responsibly)
    - Internal Password Spraying from Linux
    - Internal Password Spraying from Windows
-6. Deeper Down th Rabbit Hole
+6. [Deeper Down the Rabbit Hole](#deeper-down-the-rabbit-hole)
    - Enumerating Security Controls
    - Credentialed Enumeration from Windows
    - Credentialed Enumeration from Linux
    - Living Off the Land
-7. Cooking with the Fire
-   - Kerberoastin from Linux
-   - Kerberoastin from Windows
+7. [Cooking with the Fire](#cooking-with-the-fire)
+   - Kerberoasting from Linux
+   - Kerberoasting from Windows
 8.An ACE in the Hole
    - ACL Abuse Primer
    - ACL Enumeration
    - ACL Abuse Tactics
    - DCSync
-9. Stacking The Desck
-    
+9. Stacking The Deck
+   - Privileged Access
+   - Kerberos "Double Hop" Problem
+   -  
    
 
 
