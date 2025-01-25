@@ -1,6 +1,7 @@
 # Introduction to Active Directory Enumeration & Attacks
 
 
+![image](https://github.com/user-attachments/assets/ecc2ba67-6475-4534-bce4-e5336ae403bf)
 
 
 
