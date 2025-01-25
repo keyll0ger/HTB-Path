@@ -28,7 +28,22 @@
 9. Stacking The Deck
    - Privileged Access
    - Kerberos "Double Hop" Problem
-   -  
+   - Bleeping Edge Vulnerabilities
+   - Miscellaneous Misconfigurations
+10. Why So Trusting ?
+    - Domain Trust Primer
+    - Attacking Domain Trusts - Child -> Parent Trusts - from Windows
+    - Attacking Domain Trusts - Child -> Parent Trusts - from Linux
+11. Breaking Down Boundaries
+    - Attacking Domain Trusts - Cross-Forest Trust Abuse - from Windows
+    - Attacking Domain Trusts - Cross-Forest Trust Abuse - from Linux
+12. Defensive Considerations
+    - Hardening Active Directory
+    - Additional AD Auditing Techniques
+13. Skill Assessment - Final Showdown
+    - AD Enumeration & Attacks - Skills Assessment Part I
+    - AD Enumeration & Attacks - Skills Assessment Part II
+    - Beyond this Module
    
 
 
