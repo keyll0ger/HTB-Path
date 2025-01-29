@@ -2894,3 +2894,52 @@ Rubeus offre une flexibilité remarquable pour effectuer des attaques Kerberoast
 ![image](https://github.com/user-attachments/assets/2c1e6280-d4e4-4ddb-a42c-7f54fd3d21e7)
 
 ### ACE Abuse Primer
+
+### Types d'ACL
+
+Il existe deux types d'ACL :
+
+#### 1. Discretionary Access Control List (DACL)
+- Définit quels principaux de sécurité sont **autorisés ou refusés** pour accéder à un objet.
+- Composé d'ACE qui **autorisent** ou **refusent** l'accès.
+- **Fonctionnement** :
+  - Lorsqu'un utilisateur tente d'accéder à un objet, le système vérifie la DACL pour déterminer le niveau d'accès autorisé.
+  - Si une DACL **n'existe pas** pour un objet, tous les utilisateurs ont un **accès complet**.
+  - Si une DACL existe mais **ne contient aucune ACE**, l'accès est **refusé** à tous les utilisateurs, groupes ou processus.
+
+#### 2. System Access Control List (SACL)
+- Permet aux administrateurs de **journaliser** les tentatives d'accès à des objets sécurisés.
+
+
+# Access Control Entries (ACEs)
+
+Les **Access Control Entries (ACEs)** sont des éléments contenus dans les **Access Control Lists (ACLs)**. Ils spécifient :
+- Un **utilisateur** ou un **groupe**.
+- Le **niveau d'accès** accordé à un objet sécurisable.
+
+Il existe **trois types principaux d'ACEs** applicables à tous les objets sécurisables dans Active Directory (AD) :
+
+| Type d'ACE               | Description                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------------|
+| **Access denied ACE**     | Utilisé dans une **DACL** pour indiquer qu'un utilisateur ou un groupe est **explicitement refusé** à l'accès à un objet. |
+| **Access allowed ACE**    | Utilisé dans une **DACL** pour indiquer qu'un utilisateur ou un groupe est **explicitement autorisé** à accéder à un objet. |
+| **System audit ACE**      | Utilisé dans une **SACL** pour générer des **journaux d'audit** lorsqu'un utilisateur ou un groupe tente d'accéder à un objet. Il enregistre si l'accès a été accordé ou refusé, ainsi que le type d'accès effectué. |
+
+---
+
+### Composition d'un ACE
+
+Chaque ACE est composé des **quatre éléments suivants** :
+
+1. **Security Identifier (SID)** :
+   - Identifie l'utilisateur ou le groupe ayant accès à l'objet.
+   - Représenté graphiquement par le **nom du principal**.
+
+2. **Type d'ACE** :
+   - Un indicateur spécifiant le type d'ACE : **accès refusé**, **accès autorisé** ou **audit système**.
+
+3. **Héritage** :
+   - Un ensemble de drapeaux indiquant si les **conteneurs/objets enfants** peuvent **hériter** de cette entrée ACE à partir de l'objet **parent**.
+
+4. **Masque d'accès (Access Mask)** :
+   - Une valeur **32 bits** définissant les **droits accordés** sur l'objet.
