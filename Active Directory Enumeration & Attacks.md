@@ -2943,3 +2943,70 @@ Chaque ACE est composé des **quatre éléments suivants** :
 
 4. **Masque d'accès (Access Mask)** :
    - Une valeur **32 bits** définissant les **droits accordés** sur l'objet.
+
+
+### Pourquoi les ACE sont-ils importants ?
+
+- **Utilisation par les attaquants** : Les attaquants exploitent les entrées ACE pour obtenir un accès supplémentaire ou établir une persistance dans un réseau.
+- **Perspective des tests d'intrusion** : Les ACE sont précieux pour les testeurs d'intrusion car de nombreuses organisations ne sont pas conscientes des ACE appliqués à chaque objet ou de leur impact potentiel en cas de mauvaise configuration.
+- **Détection difficile** : Les ACE ne peuvent pas être détectés par les outils de scan de vulnérabilités et restent souvent non vérifiés pendant des années, en particulier dans des environnements vastes et complexes.
+- **Mouvement latéral/vertical** : Dans les évaluations où les failles courantes d'AD sont déjà corrigées, l'abus des ACL peut être une méthode puissante pour le mouvement latéral/vertical et même la compromission complète du domaine.
+
+### Exemple de permissions de sécurité des objets Active Directory
+
+Ces permissions peuvent être énumérées et visualisées à l'aide d'outils comme **BloodHound** et exploitées avec des outils comme **PowerView** :
+
+- **ForceChangePassword** : Exploité avec `Set-DomainUserPassword`.
+- **Add Members** : Exploité avec `Add-DomainGroupMember`.
+- **GenericAll** : Exploité avec `Set-DomainUserPassword` ou `Add-DomainGroupMember`.
+- **GenericWrite** : Exploité avec `Set-DomainObject`.
+- **WriteOwner** : Exploité avec `Set-DomainObjectOwner`.
+- **WriteDACL** : Exploité avec `Add-DomainObjectACL`.
+- **AllExtendedRights** : Exploité avec `Set-DomainUserPassword` ou `Add-DomainGroupMember`.
+- **AddSelf** : Exploité avec `Add-DomainGroupMember`.
+
+### Principaux ACE couverts dans ce module
+
+#### 1. **ForceChangePassword**
+   - **Description** : Permet de réinitialiser le mot de passe d'un utilisateur sans connaître le mot de passe actuel.
+   - **Cas d'utilisation** : Doit être utilisé avec prudence, généralement après consultation du client.
+   - **Outil** : `Set-DomainUserPassword`.
+
+#### 2. **GenericWrite**
+   - **Description** : Accorde le droit d'écrire sur n'importe quel attribut non protégé d'un objet.
+   - **Cas d'utilisation** :
+     - **Objet utilisateur** : Assigner un SPN et effectuer une attaque Kerberoasting.
+     - **Objet groupe** : Ajouter un principal de sécurité à un groupe.
+     - **Objet ordinateur** : Effectuer une attaque de délégation contrainte basée sur les ressources (hors du champ de ce module).
+   - **Outil** : `Set-DomainObject`.
+
+#### 3. **AddSelf**
+   - **Description** : Permet à un utilisateur de s'ajouter lui-même à un groupe de sécurité.
+   - **Outil** : `Add-DomainGroupMember`.
+
+#### 4. **GenericAll**
+   - **Description** : Accorde un contrôle total sur un objet cible.
+   - **Cas d'utilisation** :
+     - **Objet utilisateur/groupe** : Modifier l'appartenance à un groupe, forcer le changement d'un mot de passe ou effectuer une attaque Kerberoasting ciblée.
+     - **Objet ordinateur** : Si LAPS est utilisé, lire le mot de passe LAPS pour obtenir un accès administrateur local, aidant au mouvement latéral ou à l'escalade de privilèges.
+   - **Outils** : `Set-DomainUserPassword`, `Add-DomainGroupMember`.
+
+### Représentation visuelle des attaques ACE
+
+- **Graphique** : Adapté de Charlie Bromberg (Shutdown), ce graphique fournit une répartition des différentes attaques ACE et des outils pour les exécuter à partir de Windows et Linux.
+- **Focus** : Ce module couvre principalement l'énumération et les attaques à partir d'un hôte Windows, avec des mentions des approches basées sur Linux.
+- **Module futur** : Un module dédié sur les attaques ACL approfondira chaque attaque listée dans le graphique, couvrant à la fois les méthodes Windows et Linux.
+
+### Outils mentionnés
+
+- **BloodHound** : Pour énumérer et visualiser les ACE.
+- **PowerView** : Pour exploiter les ACE dans Active Directory.
+- **Set-DomainUserPassword** : Pour les réinitialisations de mot de passe.
+- **Add-DomainGroupMember** : Pour ajouter des membres à des groupes.
+- **Set-DomainObject** : Pour modifier les attributs des objets.
+- **Set-DomainObjectOwner** : Pour changer la propriété des objets.
+- **Add-DomainObjectACL** : Pour modifier les DACL.
+
+### Conclusion
+
+Comprendre et exploiter les ACE est crucial pour les attaquants et les défenseurs dans les environnements Active Directory. En tirant parti des ACE mal configurés, les testeurs d'intrusion peuvent démontrer des risques de sécurité significatifs, tandis que les défenseurs peuvent identifier et corriger ces vulnérabilités pour renforcer leur posture de sécurité.
