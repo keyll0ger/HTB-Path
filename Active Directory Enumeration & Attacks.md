@@ -8,18 +8,18 @@
 ## Sommaire
 
 1. [Initial Enumeration](#initial-enumeration)
-   - [Initial Enumeration of the Domain](#initial-enumeration-of-the-domain)
+   - Initial Enumeration of the Domain
      
 2. [Sniffing out a Foothold](#sniffing-out-a-foothold)
-   - [LLMNR/NBT-NS Poisoning from Linux](#llmnr-nbt-ns-poisoning-from-linux)
+   - LLMNR/NBT-NS Poisoning from Linux
      
 3. [Sighting In, Hunting For A User](#sighting-in-hunting-for-a-user)
-   - [Enumerating & Retrieving Password Policies](#enumerating-&-retrieving-password-policies)
-   - [Password Spraying Making a Target User List](#password-spraying-making-a-target-user-list)
+   - Enumerating & Retrieving Password Policies
+   - Password Spraying Making a Target User List
      
 5. [Spray Responsibly](#spray-responsibly)
-   - [Internal Password Spraying from Linux](#internal-password-spraying-from-linux)
-   - [Internal Password Spraying from Windows](#internal-password-spraying-from-windows)
+   - Internal Password Spraying from Linux
+   - Internal Password Spraying from Windows
      
 6. [Deeper Down the Rabbit Hole](#deeper-down-the-rabbit-hole)
    - Enumerating Security Controls
