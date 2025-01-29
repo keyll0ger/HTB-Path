@@ -3010,3 +3010,26 @@ Ces permissions peuvent être énumérées et visualisées à l'aide d'outils co
 ### Conclusion
 
 Comprendre et exploiter les ACE est crucial pour les attaquants et les défenseurs dans les environnements Active Directory. En tirant parti des ACE mal configurés, les testeurs d'intrusion peuvent démontrer des risques de sécurité significatifs, tandis que les défenseurs peuvent identifier et corriger ces vulnérabilités pour renforcer leur posture de sécurité.
+
+
+## Attaques ACL dans la nature
+
+Nous rencontrerons de nombreux autres ACE (privilèges) intéressants dans Active Directory de temps en temps. La méthodologie pour énumérer les attaques ACL possibles en utilisant des outils tels que BloodHound et PowerView, et même les outils de gestion AD intégrés, devrait être suffisamment adaptable pour nous aider chaque fois que nous rencontrons de nouveaux privilèges dans la nature que nous ne connaissons peut-être pas encore. Par exemple, nous pouvons importer des données dans BloodHound et voir qu'un utilisateur sur lequel nous avons le contrôle (ou que nous pouvons potentiellement prendre en charge) a le droit de lire le mot de passe d'un compte de service géré par groupe (gMSA) via l'arête ReadGMSAPassword. Dans ce cas, il existe des outils tels que GMSAPasswordReader que nous pourrions utiliser, ainsi que d'autres méthodes, pour obtenir le mot de passe du compte de service en question. D'autres fois, nous pouvons rencontrer des droits étendus tels que Unexpire-Password ou Reanimate-Tombstones en utilisant PowerView et devoir faire un peu de recherche pour comprendre comment les exploiter à notre avantage. Il vaut la peine de se familiariser avec toutes les arêtes de BloodHound et autant de droits étendus Active Directory que possible car on ne sait jamais quand on peut rencontrer un droit moins commun lors d'une évaluation.
+
+### Utilisation des attaques ACL
+
+Nous pouvons utiliser les attaques ACL pour :
+
+- Mouvement latéral
+- Escalade de privilèges
+- Persistance
+
+#### Quelques scénarios d'attaque courants peuvent inclure :
+
+| Attaque | Description |
+|---------|-------------|
+| Abus des permissions de réinitialisation de mot de passe | Le personnel du Help Desk et d'autres utilisateurs informatiques se voient souvent accorder des permissions pour effectuer des réinitialisations de mot de passe et d'autres tâches privilégiées. Si nous pouvons prendre le contrôle d'un compte avec ces privilèges (ou d'un compte dans un groupe qui confère ces privilèges à ses utilisateurs), nous pouvons être en mesure d'effectuer une réinitialisation du mot de passe pour un compte plus privilégié dans le domaine. |
+| Abus de la gestion des membres du groupe | Il est également courant de voir le personnel du Help Desk et d'autres employés ayant le droit d'ajouter/supprimer des utilisateurs d'un groupe donné. Il vaut toujours la peine d'énumérer cela plus en détail, car parfois nous pouvons être en mesure d'ajouter un compte que nous contrôlons à un groupe AD intégré privilégié ou à un groupe qui nous accorde un certain type de privilège intéressant. |
+| Droits excessifs des utilisateurs | Nous voyons également couramment des objets utilisateur, ordinateur et groupe avec des droits excessifs dont un client n'est probablement pas conscient. Cela pourrait se produire après une sorte d'installation logicielle (Exchange, par exemple, ajoute de nombreux changements ACL dans l'environnement lors de l'installation) ou une sorte de configuration héritée ou accidentelle qui donne à un utilisateur des droits non intentionnels. Parfois, nous pouvons prendre le contrôle d'un compte qui a été accordé certains droits par commodité ou pour résoudre un problème agaçant plus rapidement. |
+
+Il existe de nombreux autres scénarios d'attaque possibles dans le monde des ACL Active Directory, mais ces trois sont les plus courants. Nous couvrirons l'énumération de ces droits de différentes manières, la réalisation des attaques et le nettoyage après nous-mêmes.
