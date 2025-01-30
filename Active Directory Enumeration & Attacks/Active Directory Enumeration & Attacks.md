@@ -3541,11 +3541,11 @@ Get-DomainUser -Identity adunn | select samaccountname,objectsid,memberof,userac
 
 🔹 Nom d’utilisateur : adunn
 🔹 SID (Security Identifier) : S-1-5-21-3842939050-3880317879-2865463114-1164
-🔹 Appartenance à des groupes :
-    - VPN Users 
-    - Shared Calendar Read
-    - Printer Access
-    - File Share H Drive
+🔹 Appartenance à des groupes:
+   - **VPN Users** 
+   - **Shared Calendar Read**
+   - **Printer Access**
+   - **File Share H Drive**
 🔹 Attributs du compte : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD (Le mot de passe n’expire jamais 🛑)
 💡 Pourquoi est-ce important ?
 📌 Si adunn est membre d'un groupe ayant des droits de réplication, il peut exécuter DCSync pour voler les hash des mots de passe AD.
