@@ -43,20 +43,20 @@ https://www.ired.team/
    - Bleeping Edge Vulnerabilities
    - Miscellaneous Misconfigurations
      
-10. Why So Trusting ?
+10. [Why So Trusting ?](#why-so-trusting)
     - Domain Trust Primer
     - Attacking Domain Trusts - Child -> Parent Trusts - from Windows
     - Attacking Domain Trusts - Child -> Parent Trusts - from Linux
       
-11. Breaking Down Boundaries
+11. [Breaking Down Boundaries](#breaking-down-boundaries)
     - Attacking Domain Trusts - Cross-Forest Trust Abuse - from Windows
     - Attacking Domain Trusts - Cross-Forest Trust Abuse - from Linux
       
-12. Defensive Considerations
+12. [Defensive Considerations](#defensive-considerations)
     - Hardening Active Directory
     - Additional AD Auditing Techniques
       
-13. Skill Assessment - Final Showdown
+13. [Skill Assessment Final Showdown](#skill-assessment-final-showdown)
     - AD Enumeration & Attacks - Skills Assessment Part I
     - AD Enumeration & Attacks - Skills Assessment Part II
     - Beyond this Module
@@ -3476,3 +3476,12 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 
 
 ## Stacking The Deck
+
+## Why So Trusting?
+
+## Breaking Down Boundaries
+
+## Defensive Considerations
+
+## Skill Assessment - Final Showdown
+
