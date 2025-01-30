@@ -3263,9 +3263,9 @@ Nous avons maintenant les informations nécessaires pour effectuer une attaque e
 
 ---
 
-## 🔐 Ajout de `damundsen` au groupe "Help Desk Level 1"
+### 🔐 Ajout de `damundsen` au groupe "Help Desk Level 1"
 
-### Étape 1 : Vérification des membres du groupe "Help Desk Level 1"
+Étape 1 : Vérification des membres du groupe "Help Desk Level 1"
 
 Pour vérifier les membres du groupe "Help Desk Level 1", nous utilisons la commande suivante :
 
