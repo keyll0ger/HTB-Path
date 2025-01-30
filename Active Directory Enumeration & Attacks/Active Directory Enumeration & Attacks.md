@@ -3349,6 +3349,91 @@ La prochaine étape consiste à cracker le hash avec Hashcat pour obtenir le mot
 ✔️ Élévation des privilèges pour obtenir un contrôle complet du domaine
 
 
+🧹 Nettoyage Après Attaque Active Directory
+
+Une fois l'attaque terminée, il est essentiel de procéder à un nettoyage complet pour effacer toute trace de nos actions. Voici les étapes de nettoyage que nous devons effectuer :
+
+1. **Supprimer le fake SPN** que nous avons créé pour l'utilisateur `adunn`.
+2. **Retirer `damundsen` du groupe "Help Desk Level 1"**.
+3. **Réinitialiser le mot de passe de l'utilisateur `damundsen`** à sa valeur d'origine (si nous la connaissons) ou demander au client de le faire.
+
+L'ordre des étapes est important : si nous retirons l'utilisateur du groupe avant de supprimer le fake SPN, nous perdrons les droits nécessaires pour supprimer ce SPN.
+
+---
+
+### 🚮 Suppression du Fake SPN de l'Utilisateur `adunn`
+
+#### Étape 1 : Suppression du fake SPN
+
+Pour supprimer l'attribut `servicePrincipalName` que nous avons précédemment ajouté à l'utilisateur **adunn**, nous exécutons la commande suivante :
+
+```powershell
+Set-DomainObject -Credential $Cred2 -Identity adunn -Clear serviceprincipalname -Verbose
+```
+
+Sortie attendue :
+
+```vbnet
+VERBOSE: [Get-Domain] Using alternate credentials for Get-Domain
+VERBOSE: [Set-DomainObject] Clearing 'serviceprincipalname' for object 'adunn'
+```
+Cela effacera le fake SPN de l'utilisateur adunn.
+
+🧹 Retrait de damundsen du Groupe "Help Desk Level 1"
+Étape 2 : Retirer l'utilisateur damundsen du groupe
+Ensuite, nous allons retirer damundsen du groupe "Help Desk Level 1" en utilisant la commande suivante :
+
+```powershell
+Remove-DomainGroupMember -Identity "Help Desk Level 1" -Members 'damundsen' -Credential $Cred2 -Verbose
+```
+Sortie attendue :
+
+```sql
+VERBOSE: [Get-PrincipalContext] Using alternate credentials
+VERBOSE: [Remove-DomainGroupMember] Removing member 'damundsen' from group 'Help Desk Level 1'
+True
+```
+Cela confirme que l'utilisateur damundsen a été retiré du groupe avec succès.
+
+Étape 3 : Vérification du retrait
+Pour vérifier que damundsen a bien été retiré du groupe, nous exécutons la commande suivante :
+
+```powershell
+Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName |? {$_.MemberName -eq 'damundsen'} -Verbose
+```
+S'il n'y a aucune sortie, cela indique que l'utilisateur a bien été supprimé du groupe.
+
+📑 Rapport de Nettoyage
+Même si nous avons effectué un nettoyage minutieux, il est crucial de documenter chaque modification effectuée dans un rapport final. Le client souhaite être informé de toutes les modifications apportées à l'environnement, et documenter nos actions durant l'évaluation nous aide, nous et notre client, en cas de questions futures.
+
+Points à inclure dans le rapport :
+Ajout de damundsen au groupe "Help Desk Level 1".
+Création et suppression du fake SPN sur adunn.
+Retrait de damundsen du groupe "Help Desk Level 1".
+Réinitialisation du mot de passe de l'utilisateur damundsen.
+🔍 Détection et Remédiation des Attaques ACL
+1. Audits des ACLs Dangereuses
+Il est essentiel de réaliser des audits réguliers des ACL pour identifier et supprimer celles qui sont potentiellement dangereuses. Les organisations doivent non seulement effectuer des audits AD réguliers, mais aussi former leur personnel interne à utiliser des outils comme BloodHound pour détecter les ACLs problématiques.
+
+2. Surveillance des Membres des Groupes
+La visibilité sur les groupes critiques du domaine est primordiale. Tous les groupes ayant un impact élevé doivent être surveillés afin d'alerter le personnel IT en cas de changements qui pourraient indiquer une chaîne d'attaque basée sur des ACLs.
+
+3. Audit et Surveillance des Modifications des ACLs
+Activer la politique de Security Audit avancée peut aider à détecter les changements indésirables, notamment les événements 5136. Ce type d'événement indique qu'un objet du domaine a été modifié, ce qui pourrait être le signe d'une attaque utilisant des ACLs. Voici comment ces événements peuvent apparaître dans les logs après modification :
+
+```less
+Event ID 5136: A directory service object was modified.
+```
+📈 Recommandations de Sécurité
+Audits réguliers des ACLs pour repérer les configurations dangereuses.
+Surveillance proactive des groupes à fort impact dans le domaine.
+Configuration d'audits détaillés pour surveiller les modifications des ACLs et assurer une réponse rapide en cas d'attaque.
+En appliquant ces recommandations, vous pourrez réduire significativement les risques liés aux attaques d'ACL dans votre environnement Active Directory.
+
+✅ Conclusion
+Nous avons effectué un nettoyage complet après l'attaque, en supprimant le fake SPN, retirant l'utilisateur damundsen du groupe et en réinitialisant son mot de passe. Les étapes de détection et de remédiation doivent être mises en place pour éviter que de telles attaques ne se reproduisent. En adoptant une approche proactive pour auditer et surveiller les ACL, vous renforcerez la sécurité de votre environnement Active Directory.
+
+
 ### DCSync
 
 
