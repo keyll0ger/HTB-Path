@@ -3483,5 +3483,5 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 
 ## Defensive Considerations
 
-## Skill Assessment - Final Showdown
+## Skill Assessment Final Showdown
 
