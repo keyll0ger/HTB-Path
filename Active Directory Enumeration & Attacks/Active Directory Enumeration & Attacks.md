@@ -3474,7 +3474,145 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 ```
 ### DCSync
 
+#### Attaque DCSync 🛡️- Compromission Totale d'un Domaine AD
 
+🔑 Contexte
+Nous avons pris le contrôle de l’utilisateur adunn, qui possède des privilèges DCSync dans le domaine INLANEFREIGHT.LOCAL. Cela signifie que nous pouvons utiliser cette technique pour extraire les hashs de mots de passe de tous les utilisateurs, y compris les administrateurs du domaine.
+
+🏗 Mise en place du scénario
+📌 Nous allons travailler sur deux types de machines d’attaque :
+✔️ Windows – Attaque via RDP sur MS01
+✔️ Linux – Attaque via secretsdump.py depuis une machine distante
+
+👉 Accès aux machines :
+
+Windows : RDP vers MS01 avec :
+```plaintext
+htb-student:Academy_student_AD!
+```
+Linux : Ouvrir PowerShell sur MS01 et se connecter en SSH :
+```bash
+ssh htb-student@172.16.5.225
+Mot de passe : HTB_@cademy_stdnt!
+```
+
+💡 Astuce : Il existe une version Windows de secretsdump.py sous forme de secretsdump.exe compilé depuis Impacket (disponible sur GitHub).
+
+🔍 Qu'est-ce que DCSync et comment ça fonctionne ?
+📌 Principe de l'attaque
+🕵️‍♂️ DCSync est une technique permettant de voler la base de données des mots de passe Active Directory en exploitant le protocole de réplication à distance utilisé par les contrôleurs de domaine.
+
+🛠 Le fonctionnement repose sur :
+✅ Se faire passer pour un Contrôleur de Domaine (DC)
+✅ Demander à un vrai DC de répliquer les mots de passe des utilisateurs
+✅ Extraire les hashs NTLM pour une attaque ultérieure (Pass-the-Hash, cracking, etc.)
+
+⚙️ Conditions nécessaires pour l’attaque
+🎯 Pour exécuter DCSync, il faut un compte avec des droits de réplication dans Active Directory. Les permissions requises sont :
+✔️ Replicating Directory Changes
+✔️ Replicating Directory Changes All
+
+💡 Les comptes qui ont ces droits par défaut :
+🔹 Domain Admins
+🔹 Enterprise Admins
+🔹 Tout autre compte configuré avec ces permissions
+
+🚀 Objectif final
+L’attaque DCSync permet d'obtenir les hashs NTLM des utilisateurs et administrateurs du domaine. Une fois ces hash récupérés, on peut :
+✔️ Faire une attaque Pass-the-Hash pour se connecter sans connaître le mot de passe en clair
+✔️ Craquer les hash pour obtenir les mots de passe en clair
+✔️ Prendre le contrôle total du domaine Active Directory
+
+🔥 C'est une attaque très puissante utilisée dans les compromissions de grande envergure ! 🔥
+
+📢 Résumé rapide
+📌 DCSync permet d’extraire les mots de passe NTLM d'Active Directory en exploitant les droits de réplication d'un compte utilisateur.
+📌 Si un attaquant obtient ces droits, il peut voler tous les mots de passe du domaine et prendre le contrôle total de l’infrastructure AD.
+
+🛡️ Vérification des droits de réplication DCSync
+🔍 1. Vérification de l'appartenance aux groupes de l’utilisateur adunn
+Avant d’exécuter une attaque DCSync, nous devons vérifier si l'utilisateur adunn possède des droits de réplication dans Active Directory.
+
+Commande PowerShell pour récupérer les groupes de adunn :
+```powershell
+Get-DomainUser -Identity adunn | select samaccountname,objectsid,memberof,useraccountcontrol | fl
+```
+✔️ Résultat :
+
+🔹 Nom d’utilisateur : adunn
+🔹 SID (Security Identifier) : S-1-5-21-3842939050-3880317879-2865463114-1164
+🔹 Appartenance à des groupes :
+    - VPN Users 
+    - Shared Calendar Read
+    - Printer Access
+    - File Share H Drive
+🔹 Attributs du compte : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD (Le mot de passe n’expire jamais 🛑)
+💡 Pourquoi est-ce important ?
+📌 Si adunn est membre d'un groupe ayant des droits de réplication, il peut exécuter DCSync pour voler les hash des mots de passe AD.
+
+🔎 2. Vérification des droits de réplication sur Active Directory
+Pour confirmer que adunn possède bien les permissions nécessaires, nous allons examiner les ACL (Access Control List) du domaine.
+
+Commande PowerShell pour vérifier les ACL :
+```powershell
+$sid= "S-1-5-21-3842939050-3880317879-2865463114-1164"
+Get-ObjectAcl "DC=inlanefreight,DC=local" -ResolveGUIDs | 
+? { ($_.ObjectAceType -match 'Replication-Get')} | 
+?{$_.SecurityIdentifier -match $sid} | 
+select AceQualifier, ObjectDN, ActiveDirectoryRights,SecurityIdentifier,ObjectAceType | fl
+```
+✔️ Résultat :
+adunn possède plusieurs droits de réplication :
+
+DS-Replication-Get-Changes ✅
+DS-Replication-Get-Changes-All ✅
+DS-Replication-Get-Changes-In-Filtered-Set ✅
+💡 Pourquoi est-ce critique ?
+📌 Ces droits permettent à adunn de demander au Contrôleur de Domaine de lui fournir les hash NTLM de tous les comptes. Il peut donc voler les identifiants des administrateurs ! 🔥
+
+🎭 3. Escalade des privilèges (Ajout des droits à un autre utilisateur)
+Si nous avons des droits WriteDacl sur adunn, nous pouvons :
+✔️ Ajouter ces permissions à un autre utilisateur sous notre contrôle
+✔️ Lancer DCSync
+✔️ Retirer les permissions pour effacer nos traces
+
+📌 Pourquoi ?
+Cela permettrait d'utiliser un compte discret pour l'attaque au lieu d'attirer l’attention sur adunn.
+
+🔥 4. Exécution de l'attaque DCSync
+Avec les permissions confirmées, nous pouvons extraire les hashs NTLM des comptes Active Directory.
+
+🔹 Option 1 : Mimikatz
+Commande PowerShell avec Mimikatz :
+
+```powershell
+mimikatz "lsadump::dcsync /domain:INLANEFREIGHT.LOCAL /user:Administrator" exit
+```
+✅ Cela extrait le hash NTLM de l’Administrator du domaine.
+
+🔹 Option 2 : Impacket (secretsdump.py)
+Si nous avons accès à une machine Linux, nous pouvons utiliser secretsdump.py d’Impacket :
+
+```bash
+python3 secretsdump.py INLANEFREIGHT.LOCAL/adunn@DC_IP -hashes :aad3b435b51404eeaad3b435b51404ee
+```
+✅ Cela extrait tous les hash NTLM et Kerberos et les enregistre dans un fichier.
+
+💡 Astuce : Sous Windows, on peut utiliser secretsdump.exe compilé depuis Impacket.
+
+🚀 5. Exploitation des hash récupérés
+Une fois les hash NTLM obtenus, plusieurs attaques sont possibles :
+✔️ Pass-the-Hash – Utiliser le hash pour se connecter directement sans le mot de passe
+✔️ Crack du hash – Avec Hashcat pour retrouver le mot de passe en clair
+
+📢 Résumé rapide
+✔️ On a vérifié que adunn appartient à des groupes dans AD
+✔️ On a confirmé qu'il possède les droits de réplication
+✔️ On a vu comment ajouter ces droits à un autre utilisateur
+✔️ On a exécuté DCSync avec Mimikatz et Impacket
+✔️ On a vu comment exploiter les hash NTLM pour escalader les privilèges
+
+🔥 DCSync est une attaque redoutable qui permet une compromission totale du domaine Active Directory ! 🔥
 ## Stacking The Deck
 
 ## Why So Trusting?
