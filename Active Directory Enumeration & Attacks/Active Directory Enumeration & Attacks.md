@@ -3840,6 +3840,13 @@ Enter-PSSession -ComputerName 172.16.5.5 -Credential INLANEFREIGHT\proxyagent
 ✔️ On a exploité Mimikatz pour récupérer les hash NTLM et lancer Pass-the-Hash.
 ✔️ On a testé plusieurs méthodes d’accès à distance (RDP, WinRM, Pass-the-Hash).
 
+### DCSync
+
+Perform a DCSync attack and look for another user with the option "Store password using reversible encryption" set. Submit the username as your answer. 
+
+```powershell
+Get-ADUser -Filter 'userAccountControl -band 128' -Properties userAccountControl
+```
 ## Stacking The Deck
 
 ## Why So Trusting?
